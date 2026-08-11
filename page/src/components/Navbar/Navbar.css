@@ -1,0 +1,91 @@
+/* Navbar.css */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+nav {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: calc(100% - 60px);
+    max-width: 1200px;
+    height: 55px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 25px;
+
+    box-sizing: border-box;
+
+    /* Glass */
+    background: rgba(255, 255, 255, 0.100);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    /* Borde */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 18px;
+
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+
+    z-index: 100;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    width: 45px;
+    height: 45px;
+
+    object-fit: contain;
+}
+
+
+nav ul {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+nav ul li a {
+    display: block;
+
+    padding: 10px 16px;
+
+    color: rgba(255, 255, 255, 0.85);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    font-family: sans-serif;
+    font-size: 16px;
+
+    border-radius: 10px;
+
+    transition:
+        background 0.3s ease,
+        color 0.3s ease;
+}
+
+nav ul li a:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+nav ul li a.active {
+    color: #ff8a3d;
+    background: rgba(255, 138, 61, 0.12);
+}

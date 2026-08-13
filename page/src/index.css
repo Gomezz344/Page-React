@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Preserve existing project reset after Tailwind's preflight so overrides apply */
 * {
   box-sizing: border-box;
   margin: 0;

@@ -4,9 +4,9 @@ import AnimalVideo from '../../assets/videos/video1.mp4';
 import image1 from '../../assets/images/tigre.webp';
 import image2 from '../../assets/images/img2.jpg';
 import image3 from '../../assets/images/img3.jpg'
-import image4 from '../../assets/images/img4.jpg'
-import image5 from '../../assets/images/img5.jpg'
-import image6 from '../../assets/images/img6.jpg'
+import kitsune from '../../assets/images/kitsune.avif'
+import jaguar from '../../assets/images/jaguar.jpg'
+import cachorro from '../../assets/images/cachorro.jpg'
 
 const slides = [
     {
@@ -36,17 +36,21 @@ const slides = [
     },
     {
         type: 'image',
-        src: image4,
+        src: kitsune,
         title: "Above It All",
         description: "Freedom has no boundaries."
     },
     {
         type: 'image',
-        src: image5,
+        src: jaguar,
+        title: "Life Beyond Our Eyes",
+        description: "Discover the creatures, instincts and stories that shape the wild."
     },
     {
         type: 'image',
-        src: image6,
+        src: cachorro,
+        title: "The Wild Awaits",
+        description: "Step closer to nature and discover a world ruled by instinct."
     }
 
 ];

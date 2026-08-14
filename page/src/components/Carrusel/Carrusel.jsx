@@ -12,29 +12,33 @@ const slides = [
     {
         type: 'video',
         src: AnimalVideo,
-        title: "Galaxy Page",
-        description: "A page inspired by the vastness of the galaxy."
+        title: "Wild and Free",
+        description: "Where every creature has a story, and every corner of nature hides a mystery."
     },
     {
         type: 'image',
         src: image1,
-        title: "Photos",
-        description: "The best photos from NASA's telescopes"
+        title: "Into the Wild",
+        description: "Where every creature belongs."
     },
     {
         type: 'image',
         src: image2,
-        title: "Information",
-        description: "Real photo information"
+        title: "Nature's Beauty",
+        description: "Life in every color, every shape."
     },
     {
         type: 'image',
         src: image3,
+        title: "Where Life Begins",
+        description: "Every corner of nature tells a story."
         
     },
     {
         type: 'image',
         src: image4,
+        title: "Above It All",
+        description: "Freedom has no boundaries."
     },
     {
         type: 'image',

@@ -52,7 +52,6 @@ const slides = [
         title: "The Wild Awaits",
         description: "Step closer to nature and discover a world ruled by instinct."
     }
-
 ];
 
 export function Carrusel() {

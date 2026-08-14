@@ -79,10 +79,24 @@ export function Navbar() {
               after:bg-white after:transition-all after:duration-300`
             }
           >
-            About
+            Our Story
           </NavLink>
         </li>
 
+            <li>
+                <NavLink
+                  to="/login"
+                  className={({ isActive }) =>
+                    `px-5 py-2 rounded-full text-sm font-medium transition ${
+                      isActive
+                        ? 'bg-[#9caf88] text-[#07100b]'
+                        : 'border border-white/20 text-white/90 hover:bg-[#9caf88] hover:text-[#07100b] hover:border-[#9caf88]'
+                    }`
+                  }
+                >
+                  Sign In
+                </NavLink>
+              </li>
       </ul>
     </nav>
   );

@@ -22,9 +22,7 @@ export function Register() {
   const [registered, setRegistered] = useState(false);
 
 
-  /* =========================
-     VALIDACIONES
-  ========================== */
+
 
   const validations = {
     firstName:
@@ -61,9 +59,6 @@ export function Register() {
     Object.values(validations).every(Boolean);
 
 
-  /* =========================
-     CAMBIAR CAMPOS
-  ========================== */
 
   const handleChange = (e) => {
     const {
@@ -87,9 +82,6 @@ export function Register() {
   };
 
 
-  /* =========================
-     BLUR
-  ========================== */
 
   const handleBlur = (field) => {
     setTouched({
@@ -99,9 +91,6 @@ export function Register() {
   };
 
 
-  /* =========================
-     SUBMIT
-  ========================== */
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -120,11 +109,6 @@ export function Register() {
     setRegistered(true);
   };
 
-
-  /* =========================
-     INPUT CLASSES
-  ========================== */
-
   const getInputClasses = (field) => {
 
     if (!touched[field]) {
@@ -137,11 +121,6 @@ export function Register() {
 
     return 'border-[#9caf88]/60 focus:border-[#9caf88]';
   };
-
-
-  /* =========================
-     COMPONENTE DE INPUT
-  ========================== */
 
   const Input = ({
     name,

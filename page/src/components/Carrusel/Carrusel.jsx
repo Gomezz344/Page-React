@@ -1,6 +1,6 @@
 import React from 'react';
 import {useState, useEffect} from 'react';
-import AnimalVideo from '../../assets/videos/video1.mp4';
+
 import image1 from '../../assets/images/tigre.webp';
 import image2 from '../../assets/images/img2.jpg';
 import image3 from '../../assets/images/img3.jpg'
@@ -11,7 +11,7 @@ import cachorro from '../../assets/images/cachorro.jpg'
 const slides = [
     {
         type: 'video',
-        src: AnimalVideo,
+        src: '/Page-React/videos/video1.mp4',
         title: "Wild and Free",
         description: "Where every creature has a story, and every corner of nature hides a mystery."
     },
@@ -95,9 +95,8 @@ export function Carrusel() {
 
             <div className="w-full h-full relative">
 
-                {/* Top gradient overlay */}
                 <div className="absolute top-0 left-0 w-full h-[35%] bg-gradient-to-b from-black/45 to-transparent pointer-events-none z-20" />
-                {/* Bottom gradient overlay */}
+
                 <div className="absolute bottom-0 left-0 w-full h-[35%] bg-gradient-to-t from-black/60 to-transparent pointer-events-none z-20" />
 
                 {currentSlideData.type === "image" ? (

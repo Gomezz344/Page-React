@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import Input from '../../components/Input/Input';
 
 export function Register() {
   const [form, setForm] = useState({
@@ -15,84 +16,61 @@ export function Register() {
   });
 
   const [touched, setTouched] = useState({});
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const [registered, setRegistered] = useState(false);
-
-
-
+  const [serverMessage, setServerMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const validations = {
-    firstName:
-      form.firstName.trim().length >= 2,
+    firstName: form.firstName.trim().length >= 2,
 
-    lastName:
-      form.lastName.trim().length >= 2,
+    lastName: form.lastName.trim().length >= 2,
 
-    documentType:
-      form.documentType !== '',
+    documentType: form.documentType !== '',
 
-    documentNumber:
-      /^\d{5,15}$/.test(form.documentNumber),
+    documentNumber: /^\d{5,15}$/.test(form.documentNumber),
 
-    address:
-      form.address.trim().length >= 5,
+    address: form.address.trim().length >= 5,
 
-    phone:
-      /^\d{7,15}$/.test(form.phone),
+    phone: /^\d{7,15}$/.test(form.phone),
 
-    email:
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email),
+    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email),
 
-    password:
-      form.password.length >= 6,
+    password: form.password.length >= 6,
 
     confirmPassword:
       form.confirmPassword.length > 0 &&
       form.confirmPassword === form.password,
   };
 
-
-  const formValid =
-    Object.values(validations).every(Boolean);
-
-
+  const formValid = Object.values(validations).every(Boolean);
 
   const handleChange = (e) => {
-    const {
-      name,
-      value,
-    } = e.target;
+    const { name, value } = e.target;
 
-    setForm({
-      ...form,
+    setForm((prevForm) => ({
+      ...prevForm,
       [name]: value,
-    });
+    }));
 
-    // Si vuelve a escribir después de un error,
-    // mantenemos la validación actualizada.
-    setTouched({
-      ...touched,
+    setTouched((prevTouched) => ({
+      ...prevTouched,
       [name]: true,
-    });
+    }));
 
     setRegistered(false);
+    setServerMessage('');
   };
-
-
 
   const handleBlur = (field) => {
-    setTouched({
-      ...touched,
+    setTouched((prevTouched) => ({
+      ...prevTouched,
       [field]: true,
-    });
+    }));
   };
 
-
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const allTouched = {};
@@ -105,12 +83,52 @@ export function Register() {
 
     if (!formValid) return;
 
-    // Por ahora solamente visual.
-    setRegistered(true);
+    setLoading(true);
+    setServerMessage('');
+
+    try {
+      const response = await fetch(
+        'http://localhost:3000/api/auth/register',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            nombre: form.firstName,
+            apellido: form.lastName,
+            tipo_documento: form.documentType,
+            numero_documento: form.documentNumber,
+            direccion: form.address,
+            telefono: form.phone,
+            correo: form.email,
+            password: form.password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setServerMessage(
+          data.message || 'Error al registrar el usuario.'
+        );
+        return;
+      }
+
+      setRegistered(true);
+    } catch (error) {
+      console.error('Error de conexión:', error);
+
+      setServerMessage(
+        'No se pudo conectar con el servidor.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getInputClasses = (field) => {
-
     if (!touched[field]) {
       return 'border-white/10 focus:border-[#9caf88]/60';
     }
@@ -122,111 +140,39 @@ export function Register() {
     return 'border-[#9caf88]/60 focus:border-[#9caf88]';
   };
 
-  const Input = ({
-    name,
-    label,
-    type = 'text',
-    placeholder,
-    className = '',
-  }) => (
-
-    <div className={className}>
-
-      <label
-        htmlFor={name}
-        className="mb-2 block text-[10px] uppercase tracking-[0.25em] text-white/50"
-      >
-        {label}
-      </label>
-
-      <div className="relative">
-
-        <input
-          id={name}
-          name={name}
-          type={type}
-          value={form[name]}
-          onChange={handleChange}
-          onBlur={() => handleBlur(name)}
-          placeholder={placeholder}
-          className={`w-full border bg-white/[0.03] px-4 py-3 pr-12 text-sm text-white outline-none transition placeholder:text-white/20 ${getInputClasses(name)}`}
-        />
-
-        {touched[name] && validations[name] && (
-
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9caf88]">
-            ✓
-          </span>
-
-        )}
-
-      </div>
-
-
-      {touched[name] && !validations[name] && (
-
-        <p className="mt-2 text-xs text-red-300/80">
-
-          {name === 'firstName' &&
-            'El nombre es obligatorio.'}
-
-          {name === 'lastName' &&
-            'El apellido es obligatorio.'}
-
-          {name === 'documentNumber' &&
-            'Ingresa un número de documento válido.'}
-
-          {name === 'address' &&
-            'Ingresa una dirección válida.'}
-
-          {name === 'phone' &&
-            'Ingresa un número de teléfono válido.'}
-
-          {name === 'email' &&
-            'Ingresa un correo electrónico válido.'}
-
-        </p>
-
-      )}
-
-    </div>
-
-  );
-
+  const inputProps = {
+    form,
+    handleChange,
+    handleBlur,
+    touched,
+    validations,
+    getInputClasses,
+  };
 
   return (
-
     <main className="relative min-h-screen overflow-hidden bg-[#07100b] text-white">
-
 
       {/* =========================
           FONDO
       ========================== */}
 
       <div className="absolute inset-0">
-
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(156,175,136,0.12),transparent_45%)]" />
 
         <div className="absolute -left-40 top-20 h-96 w-96 rounded-full bg-[#9caf88]/5 blur-3xl" />
 
         <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-[#9caf88]/5 blur-3xl" />
-
       </div>
-
 
       {/* =========================
           CONTENIDO
       ========================== */}
 
       <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-32">
-
         <div className="w-full max-w-2xl">
 
-
           {!registered ? (
-
             <>
-
 
               {/* =========================
                   HEADER
@@ -249,7 +195,6 @@ export function Register() {
 
               </div>
 
-
               {/* =========================
                   FORMULARIO
               ========================== */}
@@ -258,7 +203,6 @@ export function Register() {
                 onSubmit={handleSubmit}
                 className="space-y-8"
               >
-
 
                 {/* =========================
                     INFORMACIÓN PERSONAL
@@ -280,16 +224,17 @@ export function Register() {
 
                   </div>
 
-
                   <div className="grid gap-5 sm:grid-cols-2">
 
                     <Input
+                      {...inputProps}
                       name="firstName"
                       label="Nombre"
                       placeholder="Tu nombre"
                     />
 
                     <Input
+                      {...inputProps}
                       name="lastName"
                       label="Apellido"
                       placeholder="Tu apellido"
@@ -298,7 +243,6 @@ export function Register() {
                   </div>
 
                 </div>
-
 
                 {/* =========================
                     DOCUMENTO
@@ -320,11 +264,9 @@ export function Register() {
 
                   </div>
 
-
                   <div className="grid gap-5 sm:grid-cols-2">
 
-
-                    {/* Tipo documento */}
+                    {/* Tipo de documento */}
 
                     <div>
 
@@ -343,7 +285,9 @@ export function Register() {
                         onBlur={() =>
                           handleBlur('documentType')
                         }
-                        className={`w-full border bg-[#0b160f] px-4 py-3 text-sm outline-none transition ${getInputClasses('documentType')}`}
+                        className={`w-full border bg-[#0b160f] px-4 py-3 text-sm outline-none transition ${getInputClasses(
+                          'documentType'
+                        )}`}
                       >
 
                         <option value="">
@@ -368,20 +312,17 @@ export function Register() {
 
                       </select>
 
-
                       {touched.documentType &&
                         !validations.documentType && (
-
                           <p className="mt-2 text-xs text-red-300/80">
                             Selecciona un tipo de documento.
                           </p>
-
                         )}
 
                     </div>
 
-
                     <Input
+                      {...inputProps}
                       name="documentNumber"
                       label="Número de documento"
                       placeholder="1234567890"
@@ -391,7 +332,6 @@ export function Register() {
                   </div>
 
                 </div>
-
 
                 {/* =========================
                     CONTACTO
@@ -413,19 +353,19 @@ export function Register() {
 
                   </div>
 
-
                   <div className="space-y-5">
 
                     <Input
+                      {...inputProps}
                       name="address"
                       label="Dirección"
                       placeholder="Calle 00 #00-00"
                     />
 
-
                     <div className="grid gap-5 sm:grid-cols-2">
 
                       <Input
+                        {...inputProps}
                         name="phone"
                         label="Teléfono"
                         placeholder="3001234567"
@@ -433,6 +373,7 @@ export function Register() {
                       />
 
                       <Input
+                        {...inputProps}
                         name="email"
                         label="Correo electrónico"
                         placeholder="you@example.com"
@@ -444,7 +385,6 @@ export function Register() {
                   </div>
 
                 </div>
-
 
                 {/* =========================
                     SEGURIDAD
@@ -466,9 +406,7 @@ export function Register() {
 
                   </div>
 
-
                   <div className="grid gap-5 sm:grid-cols-2">
-
 
                     {/* PASSWORD */}
 
@@ -497,7 +435,9 @@ export function Register() {
                             handleBlur('password')
                           }
                           placeholder="••••••••"
-                          className={`w-full border bg-white/[0.03] px-4 py-3 pr-20 text-sm text-white outline-none transition placeholder:text-white/20 ${getInputClasses('password')}`}
+                          className={`w-full border bg-white/[0.03] px-4 py-3 pr-20 text-sm text-white outline-none transition placeholder:text-white/20 ${getInputClasses(
+                            'password'
+                          )}`}
                         />
 
                         <button
@@ -516,19 +456,15 @@ export function Register() {
 
                       </div>
 
-
                       {touched.password &&
                         !validations.password && (
-
                           <p className="mt-2 text-xs text-red-300/80">
                             La contraseña debe tener
                             al menos 6 caracteres.
                           </p>
-
                         )}
 
                     </div>
-
 
                     {/* CONFIRM PASSWORD */}
 
@@ -551,9 +487,7 @@ export function Register() {
                               ? 'text'
                               : 'password'
                           }
-                          value={
-                            form.confirmPassword
-                          }
+                          value={form.confirmPassword}
                           onChange={handleChange}
                           onBlur={() =>
                             handleBlur(
@@ -561,7 +495,9 @@ export function Register() {
                             )
                           }
                           placeholder="••••••••"
-                          className={`w-full border bg-white/[0.03] px-4 py-3 pr-20 text-sm text-white outline-none transition placeholder:text-white/20 ${getInputClasses('confirmPassword')}`}
+                          className={`w-full border bg-white/[0.03] px-4 py-3 pr-20 text-sm text-white outline-none transition placeholder:text-white/20 ${getInputClasses(
+                            'confirmPassword'
+                          )}`}
                         />
 
                         <button
@@ -580,14 +516,11 @@ export function Register() {
 
                       </div>
 
-
                       {touched.confirmPassword &&
                         !validations.confirmPassword && (
-
                           <p className="mt-2 text-xs text-red-300/80">
                             Las contraseñas no coinciden.
                           </p>
-
                         )}
 
                     </div>
@@ -596,6 +529,15 @@ export function Register() {
 
                 </div>
 
+                {/* =========================
+                    MENSAJE DEL SERVIDOR
+                ========================== */}
+
+                {serverMessage && (
+                  <p className="text-center text-sm text-red-300/80">
+                    {serverMessage}
+                  </p>
+                )}
 
                 {/* =========================
                     BOTÓN
@@ -603,19 +545,19 @@ export function Register() {
 
                 <button
                   type="submit"
-                  disabled={!formValid}
+                  disabled={!formValid || loading}
                   className={`w-full py-4 text-xs uppercase tracking-[0.25em] transition-all duration-300 ${
-                    formValid
+                    formValid && !loading
                       ? 'bg-[#9caf88] text-[#07100b] hover:bg-[#b7c7a5]'
                       : 'cursor-not-allowed bg-white/10 text-white/20'
                   }`}
                 >
-                  Create account
+                  {loading
+                    ? 'Creating account...'
+                    : 'Create account'}
                 </button>
 
-
               </form>
-
 
               {/* =========================
                   LOGIN
@@ -642,7 +584,6 @@ export function Register() {
 
           ) : (
 
-
             /* =========================
                REGISTRO COMPLETADO
             ========================== */
@@ -657,23 +598,19 @@ export function Register() {
 
               </div>
 
-
               <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#9caf88]">
                 Welcome
               </p>
 
-
               <h1 className="text-4xl font-light sm:text-5xl">
                 Account created
               </h1>
-
 
               <p className="mx-auto mt-5 max-w-md text-sm leading-7 text-white/40">
                 Your account has been created
                 successfully. You can now continue
                 to sign in.
               </p>
-
 
               <Link
                 to="/login"
@@ -687,9 +624,7 @@ export function Register() {
           )}
 
         </div>
-
       </div>
-
     </main>
   );
 }

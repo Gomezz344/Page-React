@@ -19,7 +19,9 @@ import eagle from '../../assets/images/eagle.jpg';
 ================================= */
 
 export function Home() {
+
   return (
+    
     <main className="overflow-hidden bg-[#07100b] text-white">
 
       {/* =========================

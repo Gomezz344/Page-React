@@ -8,6 +8,8 @@ import { Register } from './pages/Register/Register';
 import { Explore } from './pages/Explore/Explore';
 import { Wildlife } from './pages/Wildlife/Wildlife';
 import { ForgotPassword } from './pages/ForgotPassword/ForgotPassword.jsx';
+import { Admin } from './pages/Admin/Admin';
+import { Productos } from './pages/Admin/Productos';
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
         <Route path="/explore" element={<Explore />} />
         <Route path="/wildlife" element={<Wildlife />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/productos" element={<Productos />} />
       </Routes>
     </>
   )

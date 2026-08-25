@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Carrusel } from '../../components/Carrusel/Carrusel';
 import { Footer } from '../../components/Footer/Footer';
+import WhatsAppButton from '../../components/Whatsapp/Whatsapp';
 
 import natureImg from '../../assets/images/forest.png';
 import Ocean from '../../assets/images/ocean.jpg';
@@ -24,12 +25,8 @@ export function Home() {
     
     <main className="overflow-hidden bg-[#07100b] text-white">
 
-      {/* =========================
-          CARRUSEL
-          NO TOCADO
-      ========================== */}
       <Carrusel />
-
+      <WhatsAppButton/>
 
       {/* =========================
           A WORLD WITHOUT BORDERS

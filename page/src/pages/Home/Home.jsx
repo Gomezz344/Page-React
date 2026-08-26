@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+
 import { Carrusel } from '../../components/Carrusel/Carrusel';
 import { Footer } from '../../components/Footer/Footer';
 import WhatsAppButton from '../../components/Whatsapp/Whatsapp';
@@ -21,16 +22,78 @@ import eagle from '../../assets/images/eagle.jpg';
 
 export function Home() {
 
+  // ==========================================
+  // SERVICIOS
+  // ==========================================
+
+  const [servicios, setServicios] = useState([]);
+  const [cargandoServicios, setCargandoServicios] = useState(true);
+
+
+  // ==========================================
+  // OBTENER SERVICIOS
+  // ==========================================
+
+  useEffect(() => {
+
+    const cargarServicios = async () => {
+
+      try {
+
+        const response = await fetch(
+          'http://localhost:3000/api/servicios'
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+            'No se pudieron cargar los servicios.'
+          );
+        }
+
+        setServicios(data || []);
+
+      } catch (error) {
+
+        console.error(
+          'Error al cargar servicios:',
+          error
+        );
+
+        setServicios([]);
+
+      } finally {
+
+        setCargandoServicios(false);
+
+      }
+
+    };
+
+    cargarServicios();
+
+  }, []);
+
+
   return (
-    
+
     <main className="overflow-hidden bg-[#07100b] text-white">
 
+      {/* =========================
+          CARRUSEL
+      ========================== */}
+
       <Carrusel />
-      <WhatsAppButton/>
+
+      <WhatsAppButton />
+
 
       {/* =========================
           A WORLD WITHOUT BORDERS
       ========================== */}
+
       <Reveal>
 
         <section className="relative overflow-hidden px-6 py-32 sm:py-40">
@@ -38,6 +101,7 @@ export function Home() {
           <div className="mx-auto grid max-w-[1100px] items-center gap-16 md:grid-cols-2">
 
             {/* TEXTO */}
+
             <div>
 
               <p className="mb-5 text-xs uppercase tracking-[0.4em] text-[#9caf88]">
@@ -45,39 +109,50 @@ export function Home() {
               </p>
 
               <h2 className="text-4xl font-light leading-tight tracking-wide sm:text-5xl">
+
                 A world without
+
                 <br />
+
                 borders.
+
               </h2>
 
               <div className="mt-7 h-px w-12 bg-[#9caf88]/60" />
 
               <p className="mt-7 max-w-lg text-sm leading-8 text-white/50">
+
                 Nature doesn't follow lines.
                 Neither should we.
+
               </p>
 
               <p className="mt-4 max-w-lg text-sm leading-8 text-white/40">
+
                 From the deepest oceans to the highest mountains,
                 the natural world exists without borders. Wild & Free
                 is an invitation to explore it.
+
               </p>
 
               <Link
                 to="/explore"
                 className="group mt-8 inline-flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-white/70 transition duration-300 hover:text-[#9caf88]"
               >
+
                 Explore the wild
 
                 <span className="transition-transform duration-300 group-hover:translate-x-2">
                   →
                 </span>
+
               </Link>
 
             </div>
 
 
             {/* IMAGEN */}
+
             <div className="group relative overflow-hidden">
 
               <img
@@ -89,9 +164,11 @@ export function Home() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
 
               <div className="absolute bottom-6 left-6">
+
                 <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">
                   Into the wild
                 </span>
+
               </div>
 
             </div>
@@ -106,6 +183,7 @@ export function Home() {
       {/* =========================
           DISCOVER THE WORLD
       ========================== */}
+
       <Reveal>
 
         <section className="relative px-6 py-32 sm:py-40">
@@ -113,6 +191,7 @@ export function Home() {
           <div className="mx-auto max-w-[1200px]">
 
             {/* TÍTULO */}
+
             <div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
 
               <div>
@@ -128,14 +207,17 @@ export function Home() {
               </div>
 
               <p className="max-w-md text-sm leading-7 text-white/40 md:text-right">
+
                 Every landscape has its own rhythm, its own story,
                 and its own way of being wild.
+
               </p>
 
             </div>
 
 
             {/* PAISAJES */}
+
             <div className="grid gap-4 md:grid-cols-3">
 
               <Landscape
@@ -168,6 +250,7 @@ export function Home() {
       {/* =========================
           MEET THE WILD
       ========================== */}
+
       <Reveal>
 
         <section className="relative px-6 py-32 sm:py-40">
@@ -175,6 +258,7 @@ export function Home() {
           <div className="mx-auto max-w-[1200px]">
 
             {/* TÍTULO */}
+
             <div className="mb-16">
 
               <p className="mb-5 text-xs uppercase tracking-[0.4em] text-[#9caf88]">
@@ -188,8 +272,10 @@ export function Home() {
                 </h2>
 
                 <p className="max-w-md text-sm leading-7 text-white/40 md:text-right">
+
                   Every creature has a story.
                   Discover some of the lives that make our planet extraordinary.
+
                 </p>
 
               </div>
@@ -198,6 +284,7 @@ export function Home() {
 
 
             {/* ANIMALES */}
+
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
               <Animal
@@ -236,17 +323,20 @@ export function Home() {
 
 
             {/* LINK */}
+
             <div className="mt-12 flex justify-end">
 
               <Link
                 to="/wildlife"
                 className="group inline-flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-white/60 transition duration-300 hover:text-[#9caf88]"
               >
+
                 Discover wildlife
 
                 <span className="transition-transform duration-300 group-hover:translate-x-2">
                   →
                 </span>
+
               </Link>
 
             </div>
@@ -259,11 +349,102 @@ export function Home() {
 
 
       {/* =========================
+          SERVICIOS
+      ========================== */}
+
+      {!cargandoServicios && servicios.length > 0 && (
+
+        <Reveal>
+
+          <section className="relative px-6 py-32 sm:py-40">
+
+            <div className="mx-auto max-w-[1200px]">
+
+              {/* TÍTULO */}
+
+              <div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+
+                <div>
+
+                  <p className="mb-5 text-xs uppercase tracking-[0.4em] text-[#9caf88]">
+                    Experiences
+                  </p>
+
+                  <h2 className="text-4xl font-light tracking-wide sm:text-5xl">
+                    Explore with us.
+                  </h2>
+
+                </div>
+
+                <p className="max-w-md text-sm leading-7 text-white/40 md:text-right">
+
+                  Discover experiences designed to bring you
+                  closer to the wild.
+
+                </p>
+
+              </div>
+
+
+              {/* SERVICIOS */}
+
+              <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+
+                {servicios
+                  .filter(
+                    (servicio) =>
+                      Number(servicio.estado) === 1
+                  )
+                  .slice(0, 6)
+                  .map((servicio, index) => (
+
+                    <ServiceCard
+                      key={servicio.id}
+                      servicio={servicio}
+                      number={String(index + 1).padStart(2, '0')}
+                    />
+
+                  ))}
+
+              </div>
+
+
+              {/* LINK */}
+
+              <div className="mt-12 flex justify-end">
+
+                <Link
+                  to="/services"
+                  className="group inline-flex items-center gap-4 text-xs uppercase tracking-[0.25em] text-white/60 transition duration-300 hover:text-[#9caf88]"
+                >
+
+                  View all experiences
+
+                  <span className="transition-transform duration-300 group-hover:translate-x-2">
+                    →
+                  </span>
+
+                </Link>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </Reveal>
+
+      )}
+
+
+      {/* =========================
           CINEMATIC SECTION
       ========================== */}
+
       <section className="group relative flex min-h-screen items-center justify-center overflow-hidden">
 
         {/* IMAGEN */}
+
         <img
           src={Paisaje}
           alt="Wild nature"
@@ -271,15 +452,18 @@ export function Home() {
         />
 
         {/* OSCURECER */}
+
         <div className="absolute inset-0 bg-black/45" />
 
         {/* GRADIENTES */}
+
         <div className="absolute inset-0 bg-gradient-to-b from-[#07100b]/90 via-transparent to-[#07100b]" />
 
         <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
 
 
         {/* CONTENIDO */}
+
         <div className="relative z-10 px-6 text-center">
 
           <p className="mb-8 text-xs uppercase tracking-[0.5em] text-white/60">
@@ -289,6 +473,7 @@ export function Home() {
           <h2 className="text-5xl font-light leading-tight tracking-wide text-white sm:text-7xl lg:text-8xl">
 
             Wild is not
+
             <br />
 
             <span className="text-[#b7c7a5]">
@@ -307,6 +492,7 @@ export function Home() {
 
 
         {/* INDICADOR */}
+
         <div className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2">
 
           <div className="flex flex-col items-center gap-3 text-white/40">
@@ -329,6 +515,7 @@ export function Home() {
       {/* =========================
           KEEP EXPLORING
       ========================== */}
+
       <Reveal>
 
         <section className="relative px-6 py-32 sm:py-40">
@@ -344,14 +531,17 @@ export function Home() {
             </h2>
 
             <p className="mx-auto mt-6 max-w-xl text-sm leading-7 text-white/45">
+
               There is always another place to discover,
               another creature to meet and another story to tell.
+
             </p>
 
             <Link
               to="/explore"
               className="group mt-10 inline-flex items-center gap-4 border border-white/20 px-8 py-3 text-xs uppercase tracking-[0.25em] text-white/75 transition duration-500 hover:border-[#9caf88] hover:bg-[#9caf88] hover:text-[#07100b]"
             >
+
               Explore the world
 
               <span className="transition-transform duration-300 group-hover:translate-x-1">
@@ -370,16 +560,18 @@ export function Home() {
       {/* =========================
           FOOTER
       ========================== */}
+
       <Footer />
 
     </main>
+
   );
+
 }
 
 
 /* =================================
    REVEAL
-   Animación al entrar en pantalla
 ================================= */
 
 function Reveal({ children }) {
@@ -418,6 +610,7 @@ function Reveal({ children }) {
   }, []);
 
   return (
+
     <div
       ref={ref}
       className={`transition-all duration-[1000ms] ease-out ${
@@ -426,9 +619,13 @@ function Reveal({ children }) {
           : 'translate-y-10 opacity-0'
       }`}
     >
+
       {children}
+
     </div>
+
   );
+
 }
 
 
@@ -445,26 +642,26 @@ function Landscape({ image, title, number }) {
       className="group relative h-[500px] overflow-hidden"
     >
 
-      {/* IMAGEN */}
       <img
         src={image}
         alt={title}
         className="h-full w-full object-cover transition duration-[1200ms] ease-out group-hover:scale-110"
       />
 
-      {/* OVERLAY */}
       <div className="absolute inset-0 bg-black/25 transition duration-700 group-hover:bg-black/50" />
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
 
       {/* NÚMERO */}
+
       <span className="absolute left-6 top-6 text-xs tracking-[0.2em] text-white/50">
         {number}
       </span>
 
 
       {/* CONTENIDO */}
+
       <div className="absolute inset-x-0 bottom-0 p-7">
 
         <div className="flex items-end justify-between gap-4">
@@ -490,6 +687,7 @@ function Landscape({ image, title, number }) {
     </Link>
 
   );
+
 }
 
 
@@ -512,7 +710,6 @@ function Animal({
       className="group relative h-[450px] overflow-hidden"
     >
 
-      {/* IMAGEN */}
       <img
         src={image}
         alt={name}
@@ -521,18 +718,21 @@ function Animal({
 
 
       {/* OVERLAYS */}
+
       <div className="absolute inset-0 bg-black/10 transition duration-700 group-hover:bg-black/30" />
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
 
 
       {/* NÚMERO */}
+
       <span className="absolute right-6 top-6 text-xs tracking-[0.2em] text-white/40">
         {number}
       </span>
 
 
       {/* CONTENIDO */}
+
       <div className="absolute inset-x-0 bottom-0 p-7">
 
         <p className="mb-2 text-[10px] uppercase tracking-[0.25em] text-[#b7c7a5]/70">
@@ -560,4 +760,104 @@ function Animal({
     </Link>
 
   );
+
+}
+
+
+/* =================================
+   SERVICE CARD
+================================= */
+
+function ServiceCard({ servicio, number }) {
+
+  return (
+
+    <Link
+      to="/services"
+      className="group relative min-h-[390px] overflow-hidden border border-white/10 bg-white/[0.02] transition duration-700 hover:border-[#9caf88]/30"
+    >
+
+      {/* IMAGEN */}
+
+      {servicio.imagen ? (
+
+        <img
+          src={servicio.imagen}
+          alt={servicio.nombre}
+          className="absolute inset-0 h-full w-full object-cover opacity-40 transition duration-[1200ms] ease-out group-hover:scale-110 group-hover:opacity-55"
+        />
+
+      ) : (
+
+        <div className="absolute inset-0 bg-gradient-to-br from-[#132419] via-[#0b170f] to-[#07100b]" />
+
+      )}
+
+
+      {/* OVERLAY */}
+
+      <div className="absolute inset-0 bg-black/40 transition duration-700 group-hover:bg-black/25" />
+
+      <div className="absolute inset-0 bg-gradient-to-t from-[#07100b] via-black/20 to-transparent" />
+
+
+      {/* NÚMERO */}
+
+      <span className="absolute right-6 top-6 text-xs tracking-[0.2em] text-white/40">
+        {number}
+      </span>
+
+
+      {/* CONTENIDO */}
+
+      <div className="absolute inset-x-0 bottom-0 p-7">
+
+        <p className="mb-3 text-[10px] uppercase tracking-[0.3em] text-[#b7c7a5]/70">
+          Experience
+        </p>
+
+        <h3 className="text-3xl font-light tracking-wide">
+          {servicio.nombre}
+        </h3>
+
+        {servicio.descripcion && (
+
+          <p className="mt-4 line-clamp-2 text-sm leading-7 text-white/50">
+            {servicio.descripcion}
+          </p>
+
+        )}
+
+
+        <div className="mt-5 flex items-end justify-between gap-4">
+
+          <div>
+
+            <p className="text-lg font-light text-[#b7c7a5]">
+              ${Number(servicio.precio || 0).toLocaleString('es-CO')}
+            </p>
+
+            {servicio.duracion && (
+
+              <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-white/35">
+                {servicio.duracion}
+              </p>
+
+            )}
+
+          </div>
+
+
+          <span className="translate-x-2 text-xs uppercase tracking-[0.15em] text-[#b7c7a5] opacity-0 transition-all duration-500 group-hover:translate-x-0 group-hover:opacity-100">
+            Discover →
+          </span>
+
+        </div>
+
+      </div>
+
+    </Link>
+
+  );
+
 }

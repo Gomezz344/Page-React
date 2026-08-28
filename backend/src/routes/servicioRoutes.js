@@ -2,6 +2,7 @@ const express = require('express');
 
 const {
   obtenerServicios,
+  obtenerServicioPorId,
   crearServicio,
   actualizarServicio,
   eliminarServicio,
@@ -25,6 +26,16 @@ const router = express.Router();
 router.get(
   '/',
   obtenerServicios
+);
+
+// ==========================================
+// OBTENER SERVICIO POR ID
+// PÚBLICO
+// ==========================================
+
+router.get(
+  '/:id',
+  obtenerServicioPorId
 );
 
 
@@ -65,6 +76,8 @@ router.delete(
   roleMiddleware(1),
   eliminarServicio
 );
+
+
 
 
 module.exports = router;

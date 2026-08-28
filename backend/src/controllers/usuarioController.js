@@ -467,6 +467,189 @@ const actualizarUsuario = async (req, res) => {
   }
 };
 
+// ==========================================
+// OBTENER MI PERFIL
+// ==========================================
+
+const obtenerMiPerfil = async (req, res) => {
+  try {
+
+    const { id } = req.usuario;
+
+    const usuarios = await pool.query(
+      `SELECT
+        id,
+        nombre,
+        apellido,
+        tipo_documento,
+        numero_documento,
+        direccion,
+        telefono,
+        correo,
+        rol_id,
+        estado,
+        fecha_registro
+      FROM usuarios
+      WHERE id = ?
+      LIMIT 1`,
+      [id]
+    );
+
+
+    if (usuarios.length === 0) {
+
+      return res.status(404).json({
+        message: 'Usuario no encontrado.',
+      });
+
+    }
+
+
+    res.status(200).json({
+      usuario: usuarios[0],
+    });
+
+  } catch (error) {
+
+    console.error(
+      'Error al obtener mi perfil:',
+      error
+    );
+
+    res.status(500).json({
+      message: 'Error interno del servidor.',
+    });
+
+  }
+};
+
+// ==========================================
+// ACTUALIZAR MI PERFIL
+// ==========================================
+
+const actualizarMiPerfil = async (req, res) => {
+  try {
+
+    const { id } = req.usuario;
+
+    const {
+      nombre,
+      apellido,
+      direccion,
+      telefono,
+      correo,
+    } = req.body;
+
+
+    // ==========================================
+    // VALIDAR CAMPOS
+    // ==========================================
+
+    if (
+      !nombre ||
+      !apellido ||
+      !direccion ||
+      !telefono ||
+      !correo
+    ) {
+
+      return res.status(400).json({
+        message: 'Todos los campos son obligatorios.',
+      });
+
+    }
+
+
+    // ==========================================
+    // COMPROBAR CORREO DUPLICADO
+    // ==========================================
+
+    const usuarioCorreo = await pool.query(
+      `SELECT id
+       FROM usuarios
+       WHERE correo = ?
+       AND id != ?
+       LIMIT 1`,
+      [correo, id]
+    );
+
+
+    if (usuarioCorreo.length > 0) {
+
+      return res.status(409).json({
+        message: 'El correo ya está registrado por otro usuario.',
+      });
+
+    }
+
+
+    // ==========================================
+    // ACTUALIZAR
+    // ==========================================
+
+    await pool.query(
+      `UPDATE usuarios
+       SET
+         nombre = ?,
+         apellido = ?,
+         direccion = ?,
+         telefono = ?,
+         correo = ?
+       WHERE id = ?`,
+      [
+        nombre,
+        apellido,
+        direccion,
+        telefono,
+        correo,
+        id,
+      ]
+    );
+
+
+    // ==========================================
+    // OBTENER DATOS ACTUALIZADOS
+    // ==========================================
+
+    const usuarios = await pool.query(
+      `SELECT
+        id,
+        nombre,
+        apellido,
+        tipo_documento,
+        numero_documento,
+        direccion,
+        telefono,
+        correo,
+        rol_id,
+        estado,
+        fecha_registro
+      FROM usuarios
+      WHERE id = ?
+      LIMIT 1`,
+      [id]
+    );
+
+
+    res.status(200).json({
+      message: 'Perfil actualizado correctamente.',
+      usuario: usuarios[0],
+    });
+
+  } catch (error) {
+
+    console.error(
+      'Error al actualizar mi perfil:',
+      error
+    );
+
+    res.status(500).json({
+      message: 'Error interno del servidor.',
+    });
+
+  }
+};
+
 
 // ==========================================
 // ELIMINAR USUARIO
@@ -545,6 +728,9 @@ module.exports = {
   obtenerUsuarios,
   crearUsuario,
   obtenerUsuarioPorId,
+  actualizarUsuario,
+  obtenerMiPerfil,
+  actualizarMiPerfil,
   actualizarUsuario,
   eliminarUsuario,
 };

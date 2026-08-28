@@ -6,10 +6,12 @@ import { Home } from './pages/Home/Home'
 import { About } from './pages/OurStory/OurStory'
 import { Contact } from './pages/Contact/Contact'
 import { Tours } from './pages/Tours/Tours'
+import { TourDetail } from './pages/Tours/TourDetail'
 import { Login } from './pages/Login/Login'
 import { Register } from './pages/Register/Register'
 import { Explore } from './pages/Explore/Explore'
 import { Wildlife } from './pages/Wildlife/Wildlife'
+import { Profile } from './pages/Profile/Profile'
 import { ForgotPassword } from './pages/ForgotPassword/ForgotPassword.jsx'
 
 import { Admin } from './pages/Admin/Admin'
@@ -43,8 +45,6 @@ function App() {
           element={<Contact />}
         />
 
-        
-
         <Route
           path="/login"
           element={<Login />}
@@ -65,9 +65,20 @@ function App() {
           element={<Wildlife />}
         />
 
-        <Route path="/tours"
-         element={<Tours />} 
-         />
+        <Route
+          path="/profile"
+          element={<Profile />}
+        />
+
+        <Route
+          path="/tours"
+          element={<Tours />}
+        />
+
+        <Route
+          path="/tours/:id"
+          element={<TourDetail />}
+        />
 
         <Route
           path="/forgot-password"

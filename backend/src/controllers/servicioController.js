@@ -269,6 +269,70 @@ const eliminarServicio = async (req, res) => {
 
 };
 
+// ==========================================
+// OBTENER SERVICIO POR ID
+// ==========================================
+
+const obtenerServicioPorId = async (req, res) => {
+
+  try {
+
+    const { id } = req.params;
+
+
+    // ==========================================
+    // BUSCAR SERVICIO
+    // ==========================================
+
+    const servicios = await db.query(
+      `
+      SELECT *
+      FROM servicios
+      WHERE id = ?
+      LIMIT 1
+      `,
+      [id]
+    );
+
+
+    // ==========================================
+    // VERIFICAR EXISTENCIA
+    // ==========================================
+
+    if (servicios.length === 0) {
+
+      return res.status(404).json({
+        message: 'Servicio no encontrado.',
+      });
+
+    }
+
+
+    // ==========================================
+    // RESPUESTA
+    // ==========================================
+
+    res.status(200).json({
+
+      servicio: servicios[0],
+
+    });
+
+  } catch (error) {
+
+    console.error(
+      'Error al obtener servicio:',
+      error
+    );
+
+    res.status(500).json({
+      message: 'Error al obtener el servicio.',
+    });
+
+  }
+
+};
+
 
 // ==========================================
 // EXPORTAR
@@ -276,6 +340,7 @@ const eliminarServicio = async (req, res) => {
 
 module.exports = {
   obtenerServicios,
+  obtenerServicioPorId,
   crearServicio,
   actualizarServicio,
   eliminarServicio,

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_URL } from '../../../api/client';
 
 export function Servicios() {
   const [servicios, setServicios] = useState([]);
@@ -14,6 +15,7 @@ export function Servicios() {
     precio: '',
     duracion: '',
     imagen: '',
+    stock: 0,
     estado: 1,
   });
 
@@ -34,7 +36,7 @@ export function Servicios() {
         sessionStorage.getItem('token');
 
       const response = await fetch(
-        'http://localhost:3000/api/servicios',
+        `${API_URL}/servicios`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -103,6 +105,7 @@ export function Servicios() {
       precio: '',
       duracion: '',
       imagen: '',
+      stock: 0,
       estado: 1,
     });
 
@@ -138,6 +141,7 @@ export function Servicios() {
       precio: servicio.precio ?? '',
       duracion: servicio.duracion || '',
       imagen: servicio.imagen || '',
+      stock: servicio.stock ?? 0,
       estado: servicio.estado ?? 1,
     });
 
@@ -168,13 +172,14 @@ export function Servicios() {
         precio: Number(form.precio),
         duracion: form.duracion,
         imagen: form.imagen,
+        stock: Number(form.stock),
         estado: Number(form.estado),
       };
 
 
       const url = editando
-        ? `http://localhost:3000/api/servicios/${editando}`
-        : 'http://localhost:3000/api/servicios';
+        ? `${API_URL}/servicios/${editando}`
+        : `${API_URL}/servicios`;
 
       const method = editando
         ? 'PUT'
@@ -251,7 +256,7 @@ export function Servicios() {
 
 
       const response = await fetch(
-        `http://localhost:3000/api/servicios/${id}`,
+        `${API_URL}/servicios/${id}`,
         {
           method: 'DELETE',
 
@@ -410,6 +415,10 @@ export function Servicios() {
                 </th>
 
                 <th className="px-6 py-5 text-[9px] uppercase tracking-[0.25em] text-white/30">
+                  Stock
+                </th>
+
+                <th className="px-6 py-5 text-[9px] uppercase tracking-[0.25em] text-white/30">
                   Estado
                 </th>
 
@@ -429,7 +438,7 @@ export function Servicios() {
                 <tr>
 
                   <td
-                    colSpan="5"
+                    colSpan="6"
                     className="px-6 py-16 text-center"
                   >
 
@@ -524,6 +533,12 @@ export function Servicios() {
                         {servicio.duracion || 'No especificada'}
                       </p>
 
+                    </td>
+
+                    <td className="px-6 py-5">
+                      <p className={`text-sm ${Number(servicio.stock) > 0 ? 'text-white/70' : 'text-red-300/70'}`}>
+                        {servicio.stock ?? 0}
+                      </p>
                     </td>
 
 
@@ -730,6 +745,26 @@ export function Servicios() {
                     onChange={handleChange}
                     className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
                     placeholder="Ej: 3 horas"
+                  />
+
+                </div>
+
+                <div>
+
+                  <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
+                    Stock disponible
+                  </label>
+
+                  <input
+                    name="stock"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={form.stock}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
+                    placeholder="0"
                   />
 
                 </div>

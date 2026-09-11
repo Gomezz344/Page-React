@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { API_URL } from '../../api/client';
 import { Link } from 'react-router-dom';
 import Input from '../../components/Input/Input';
 
@@ -88,7 +89,7 @@ export function Register() {
 
     try {
       const response = await fetch(
-        'http://localhost:3000/api/auth/register',
+        `${API_URL}/auth/register`,
         {
           method: 'POST',
           headers: {

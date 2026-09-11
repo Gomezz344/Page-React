@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_URL } from '../../api/client';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 
@@ -53,7 +54,7 @@ export function Profile() {
       setError('');
 
       const response = await fetch(
-        'http://localhost:3000/api/usuarios/me',
+        `${API_URL}/usuarios/me`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -152,7 +153,7 @@ export function Profile() {
 
 
       const response = await fetch(
-        'http://localhost:3000/api/usuarios/me',
+        `${API_URL}/usuarios/me`,
         {
           method: 'PUT',
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import logo from '../../assets/icons/logo.png';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useCart } from '../../context/CartContext.jsx';
 
 export function Navbar() {
 
@@ -10,6 +11,7 @@ export function Navbar() {
     isAuthenticated,
     logout,
   } = useAuth();
+  const { count } = useCart();
 
   const navigate = useNavigate();
 
@@ -176,6 +178,16 @@ export function Navbar() {
               className={navLinkClass}
             >
               Tours
+            </NavLink>
+          </li>
+
+          <li>
+            <NavLink
+              to="/shop"
+              className={({ isActive }) => `${navLinkClass({ isActive })} inline-flex items-center gap-2`}
+            >
+              Compras
+              <span className="text-[10px] text-[#c9d5bd]">{count}</span>
             </NavLink>
           </li>
 
@@ -554,6 +566,15 @@ export function Navbar() {
                 className={navLinkClass}
               >
                 Tours
+              </NavLink>
+
+
+              <NavLink
+                to="/shop"
+                onClick={closeMobileMenu}
+                className={navLinkClass}
+              >
+                Compras ({count})
               </NavLink>
 
 

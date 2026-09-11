@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import { API_URL } from '../../../api/client';
 
 export function Usuarios() {
 
@@ -58,7 +59,7 @@ export function Usuarios() {
         sessionStorage.getItem('token');
 
       const response = await fetch(
-        'http://localhost:3000/api/usuarios',
+        `${API_URL}/usuarios`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -235,15 +236,18 @@ export function Usuarios() {
         direccion: form.direccion,
         telefono: form.telefono,
         correo: form.correo,
-        password: form.password,
         rol_id: rolFinal,
         estado: estadoFinal,
 
       };
 
+      if (form.password.trim()) {
+        usuario.password = form.password;
+      }
+
 
       const response = await fetch(
-        `http://localhost:3000/api/usuarios/${editando}`,
+        `${API_URL}/usuarios/${editando}`,
         {
           method: 'PUT',
 

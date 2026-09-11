@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { API_URL } from '../../api/client';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -63,7 +64,7 @@ export function Login() {
 
     try {
       const response = await fetch(
-        'http://localhost:3000/api/auth/login',
+        `${API_URL}/auth/login`,
         {
           method: 'POST',
           headers: {

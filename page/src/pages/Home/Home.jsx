@@ -1,3 +1,4 @@
+import { API_URL } from '../../api/client';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -41,7 +42,7 @@ export function Home() {
       try {
 
         const response = await fetch(
-          'http://localhost:3000/api/servicios'
+          `${API_URL}/servicios`
         );
 
         const data = await response.json();

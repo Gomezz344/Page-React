@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_URL } from '../../api/client';
 import { Routes, Route, useLocation } from 'react-router-dom';
 
 import { AdminSidebar } from '../../components/Admin/AdminSideBar';
@@ -42,7 +43,7 @@ export function Admin() {
 
 
       const response = await fetch(
-        'http://localhost:3000/api/admin/stats',
+        `${API_URL}/admin/stats`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import { API_URL } from '../../../api/client';
 
 export function Productos() {
 
@@ -36,7 +37,7 @@ export function Productos() {
       setError('');
 
       const response = await fetch(
-        'http://localhost:3000/api/productos',
+        `${API_URL}/productos`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -173,8 +174,8 @@ export function Productos() {
       };
 
       const url = editando
-        ? `http://localhost:3000/api/productos/${editando}`
-        : 'http://localhost:3000/api/productos';
+        ? `${API_URL}/productos/${editando}`
+        : `${API_URL}/productos`;
 
       const method = editando ? 'PUT' : 'POST';
 
@@ -237,7 +238,7 @@ export function Productos() {
       setError('');
 
       const response = await fetch(
-        `http://localhost:3000/api/productos/${id}`,
+        `${API_URL}/productos/${id}`,
         {
           method: 'DELETE',
           headers: {

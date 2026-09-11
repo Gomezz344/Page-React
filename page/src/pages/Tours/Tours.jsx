@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_URL } from '../../api/client';
 import { Link } from 'react-router-dom';
 import HeroImg from '../../assets/images/tours.jpg'
 
@@ -25,7 +26,7 @@ export function Tours() {
       setError('');
 
       const response = await fetch(
-        'http://localhost:3000/api/servicios'
+        `${API_URL}/servicios`
       );
 
       const data = await response.json();

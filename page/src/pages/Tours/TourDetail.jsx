@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_URL } from '../../api/client';
 import { Link, useParams } from 'react-router-dom';
 
 export function TourDetail() {
@@ -17,7 +18,7 @@ export function TourDetail() {
       setError('');
 
       const response = await fetch(
-        `http://localhost:3000/api/servicios/${id}`
+        `${API_URL}/servicios/${id}`
       );
 
       const data = await response.json();

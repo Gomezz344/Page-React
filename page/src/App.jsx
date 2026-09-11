@@ -13,6 +13,7 @@ import { Explore } from './pages/Explore/Explore'
 import { Wildlife } from './pages/Wildlife/Wildlife'
 import { Profile } from './pages/Profile/Profile'
 import { ForgotPassword } from './pages/ForgotPassword/ForgotPassword.jsx'
+import { Shop } from './pages/Shop/Shop.jsx'
 
 import { Admin } from './pages/Admin/Admin'
 import { ProtectedRoute } from './components/Auth/ProtectedRoute'
@@ -78,6 +79,11 @@ function App() {
         <Route
           path="/tours/:id"
           element={<TourDetail />}
+        />
+
+        <Route
+          path="/shop"
+          element={<Shop />}
         />
 
         <Route

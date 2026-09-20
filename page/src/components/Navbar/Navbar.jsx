@@ -330,13 +330,13 @@ export function Navbar() {
                       hover:text-[#9caf88]
                     "
                   >
-                    Mi perfil
+                    My profile
                   </button>
 
 
                   {/* ADMIN */}
 
-                  {Number(usuario?.rol_id) === 1 && (
+                  {[1, 2].includes(Number(usuario?.rol_id)) && (
 
                     <button
                       type="button"
@@ -359,7 +359,7 @@ export function Navbar() {
                         hover:text-[#9caf88]
                       "
                     >
-                      Panel de administración
+                        Management panel
                     </button>
 
                   )}
@@ -385,7 +385,7 @@ export function Navbar() {
                         hover:text-red-300
                       "
                     >
-                      Cerrar sesión
+                      Sign out
                     </button>
 
                   </div>
@@ -412,8 +412,8 @@ export function Navbar() {
           }
           aria-label={
             mobileMenuOpen
-              ? 'Cerrar menú'
-              : 'Abrir menú'
+              ? 'Close menu'
+              : 'Open menu'
           }
           aria-expanded={mobileMenuOpen}
           className="
@@ -661,7 +661,7 @@ export function Navbar() {
                       hover:text-[#9caf88]
                     "
                   >
-                    Mi perfil
+                    My profile
                   </button>
 
 
@@ -688,7 +688,7 @@ export function Navbar() {
                         hover:text-[#9caf88]
                       "
                     >
-                      Panel de administración
+                      Management panel
                     </button>
 
                   )}
@@ -713,7 +713,7 @@ export function Navbar() {
                       hover:text-red-300
                     "
                   >
-                    Cerrar sesión
+                    Sign out
                   </button>
 
                 </div>

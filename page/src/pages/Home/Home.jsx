@@ -50,7 +50,7 @@ export function Home() {
         if (!response.ok) {
           throw new Error(
             data.message ||
-            'No se pudieron cargar los servicios.'
+            'Could not load the services.'
           );
         }
 
@@ -59,7 +59,7 @@ export function Home() {
       } catch (error) {
 
         console.error(
-          'Error al cargar servicios:',
+          'Error loading services:',
           error
         );
 

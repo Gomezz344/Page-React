@@ -11,3 +11,12 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     token: str
     usuario: UsuarioOut
+
+
+class ForgotPasswordRequest(BaseModel):
+    correo: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(min_length=32, max_length=128)
+    password: str = Field(min_length=6, max_length=128)

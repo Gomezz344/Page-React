@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { API_URL } from '../../../api/client';
+import { useAuth } from '../../../context/AuthContext';
 
 export function Servicios() {
+  const { usuario } = useAuth();
+  const isAdmin = Number(usuario?.rol_id) === 1;
   const [servicios, setServicios] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -48,7 +51,7 @@ export function Servicios() {
 
       if (!response.ok) {
         throw new Error(
-          data.message || 'Error al obtener los servicios.'
+          data.message || 'Could not load the services.'
         );
       }
 
@@ -57,7 +60,7 @@ export function Servicios() {
     } catch (error) {
 
       console.error(
-        'Error al cargar servicios:',
+        'Error loading services:',
         error
       );
 
@@ -207,7 +210,7 @@ export function Servicios() {
 
         throw new Error(
           data.message ||
-          'No se pudo guardar el servicio.'
+          'Could not save the service.'
         );
 
       }
@@ -222,7 +225,7 @@ export function Servicios() {
     } catch (error) {
 
       console.error(
-        'Error al guardar servicio:',
+        'Error saving service:',
         error
       );
 
@@ -240,7 +243,7 @@ export function Servicios() {
   const eliminarServicio = async (id) => {
 
     const confirmar = window.confirm(
-      '¿Seguro que quieres eliminar este servicio?'
+      'Are you sure you want to delete this service?'
     );
 
     if (!confirmar) return;
@@ -274,7 +277,7 @@ export function Servicios() {
 
         throw new Error(
           data.message ||
-          'No se pudo eliminar el servicio.'
+          'Could not delete the service.'
         );
 
       }
@@ -285,7 +288,7 @@ export function Servicios() {
     } catch (error) {
 
       console.error(
-        'Error al eliminar servicio:',
+        'Error deleting service:',
         error
       );
 
@@ -313,7 +316,7 @@ export function Servicios() {
           </p>
 
           <h2 className="text-3xl font-light">
-            Servicios
+            Services
           </h2>
 
         </div>
@@ -322,7 +325,7 @@ export function Servicios() {
         <div className="border border-white/10 bg-white/[0.02] p-10 text-center">
 
           <p className="text-sm text-white/40">
-            Cargando servicios...
+            Loading services...
           </p>
 
         </div>
@@ -351,22 +354,24 @@ export function Servicios() {
           </p>
 
           <h2 className="text-3xl font-light tracking-wide">
-            Servicios
+            Services
           </h2>
 
           <p className="mt-3 text-sm text-white/40">
-            Gestiona los servicios disponibles en Wildlife.
+            Manage the services available in Wildlife.
           </p>
 
         </div>
 
 
-        <button
-          onClick={abrirCrear}
-          className="border border-[#9caf88]/40 bg-[#9caf88] px-6 py-3 text-xs uppercase tracking-[0.2em] text-[#07100b] transition hover:bg-[#b7c7a5]"
-        >
-          + Nuevo servicio
-        </button>
+        {isAdmin && (
+          <button
+            onClick={abrirCrear}
+            className="border border-[#9caf88]/40 bg-[#9caf88] px-6 py-3 text-xs uppercase tracking-[0.2em] text-[#07100b] transition hover:bg-[#b7c7a5]"
+          >
+            + New service
+          </button>
+        )}
 
       </div>
 
@@ -443,16 +448,18 @@ export function Servicios() {
                   >
 
                     <p className="text-sm text-white/30">
-                      No hay servicios registrados.
+                      No services registered.
                     </p>
 
 
-                    <button
-                      onClick={abrirCrear}
-                      className="mt-4 text-xs uppercase tracking-[0.2em] text-[#9caf88] hover:text-[#b7c7a5]"
-                    >
-                      Crear el primero
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={abrirCrear}
+                        className="mt-4 text-xs uppercase tracking-[0.2em] text-[#9caf88] hover:text-[#b7c7a5]"
+                      >
+                        Create the first one
+                      </button>
+                    )}
 
                   </td>
 
@@ -501,7 +508,7 @@ export function Servicios() {
                           </p>
 
                           <p className="mt-1 max-w-xs truncate text-xs text-white/30">
-                            {servicio.descripcion || 'Sin descripción'}
+                            {servicio.descripcion || 'No description'}
                           </p>
 
                         </div>
@@ -549,13 +556,13 @@ export function Servicios() {
                       {servicio.estado === 1 ? (
 
                         <span className="border border-[#9caf88]/20 bg-[#9caf88]/5 px-3 py-1 text-[9px] uppercase tracking-wider text-[#9caf88]">
-                          Activo
+                          Active
                         </span>
 
                       ) : (
 
                         <span className="border border-white/10 bg-white/5 px-3 py-1 text-[9px] uppercase tracking-wider text-white/30">
-                          Inactivo
+                          Inactive
                         </span>
 
                       )}
@@ -575,18 +582,20 @@ export function Servicios() {
                           }
                           className="border border-white/10 px-4 py-2 text-[9px] uppercase tracking-wider text-white/50 transition hover:border-[#9caf88]/40 hover:text-[#9caf88]"
                         >
-                          Editar
+                          Edit
                         </button>
 
 
-                        <button
-                          onClick={() =>
-                            eliminarServicio(servicio.id)
-                          }
-                          className="border border-red-400/10 px-4 py-2 text-[9px] uppercase tracking-wider text-red-300/50 transition hover:border-red-400/30 hover:text-red-300"
-                        >
-                          Eliminar
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() =>
+                              eliminarServicio(servicio.id)
+                            }
+                            className="border border-red-400/10 px-4 py-2 text-[9px] uppercase tracking-wider text-red-300/50 transition hover:border-red-400/30 hover:text-red-300"
+                          >
+                            Delete
+                          </button>
+                        )}
 
                       </div>
 
@@ -636,8 +645,8 @@ export function Servicios() {
                 <h3 className="mt-2 text-2xl font-light">
 
                   {editando
-                    ? 'Editar servicio'
-                    : 'Crear servicio'}
+                    ? 'Edit service'
+                    : 'Create service'}
 
                 </h3>
 
@@ -673,7 +682,7 @@ export function Servicios() {
               <div>
 
                 <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                  Nombre
+                  Name
                 </label>
 
                 <input
@@ -682,7 +691,7 @@ export function Servicios() {
                   onChange={handleChange}
                   required
                   className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
-                  placeholder="Nombre del servicio"
+                  placeholder="Service name"
                 />
 
               </div>
@@ -693,7 +702,7 @@ export function Servicios() {
               <div>
 
                 <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                  Descripción
+                  Description
                 </label>
 
                 <textarea
@@ -702,7 +711,7 @@ export function Servicios() {
                   onChange={handleChange}
                   rows="4"
                   className="w-full resize-none border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
-                  placeholder="Descripción del servicio"
+                  placeholder="Service description"
                 />
 
               </div>
@@ -715,7 +724,7 @@ export function Servicios() {
                 <div>
 
                   <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                    Precio
+                    Price
                   </label>
 
                   <input
@@ -736,7 +745,7 @@ export function Servicios() {
                 <div>
 
                   <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                    Duración
+                    Duration
                   </label>
 
                   <input
@@ -744,7 +753,7 @@ export function Servicios() {
                     value={form.duracion}
                     onChange={handleChange}
                     className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
-                    placeholder="Ej: 3 horas"
+                    placeholder="e.g. 3 hours"
                   />
 
                 </div>
@@ -752,7 +761,7 @@ export function Servicios() {
                 <div>
 
                   <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                    Stock disponible
+                    Available stock
                   </label>
 
                   <input
@@ -777,7 +786,7 @@ export function Servicios() {
               <div>
 
                 <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                  URL de imagen
+                  Image URL
                 </label>
 
                 <input
@@ -809,11 +818,11 @@ export function Servicios() {
                   >
 
                     <option value="1">
-                      Activo
+                      Active
                     </option>
 
                     <option value="0">
-                      Inactivo
+                      Inactive
                     </option>
 
                   </select>
@@ -838,7 +847,7 @@ export function Servicios() {
                   }}
                   className="border border-white/10 px-6 py-3 text-xs uppercase tracking-[0.2em] text-white/50 transition hover:text-white"
                 >
-                  Cancelar
+                  Cancel
                 </button>
 
 
@@ -848,8 +857,8 @@ export function Servicios() {
                 >
 
                   {editando
-                    ? 'Guardar cambios'
-                    : 'Crear servicio'}
+                    ? 'Save changes'
+                    : 'Create service'}
 
                 </button>
 

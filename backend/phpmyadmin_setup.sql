@@ -69,6 +69,29 @@ CREATE TABLE IF NOT EXISTS servicios (
   PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS carrito_items (
+  id INT NOT NULL AUTO_INCREMENT,
+  usuario_id INT NOT NULL,
+  tipo VARCHAR(20) NOT NULL,
+  item_id INT NOT NULL,
+  cantidad INT NOT NULL DEFAULT 1,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_carrito_usuario_item (usuario_id, tipo, item_id),
+  CONSTRAINT fk_carrito_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id INT NOT NULL AUTO_INCREMENT,
+  usuario_id INT NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  used_at DATETIME NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_password_reset_token_hash (token_hash),
+  KEY ix_password_reset_usuario_id (usuario_id),
+  CONSTRAINT fk_password_reset_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 INSERT INTO roles (id, nombre, descripcion) VALUES
   (1, 'Administrador', 'Acceso total al sistema'),
   (2, 'Empleado', 'Gestion operativa'),

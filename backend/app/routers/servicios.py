@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ..core.deps import require_role
+from ..core.deps import require_role, require_roles
 from ..database import get_db
 from ..models import Servicio, Usuario
 from ..schemas.common import ServicioCreate, ServicioOut, ServicioResponse, ServicioUpdate
@@ -39,7 +39,7 @@ def create_service(payload: ServicioCreate, _: Usuario = Depends(require_role(1)
 
 
 @router.put("/{service_id}", response_model=ServicioOut)
-def update_service(service_id: int, payload: ServicioUpdate, _: Usuario = Depends(require_role(1)), db: Session = Depends(get_db)):
+def update_service(service_id: int, payload: ServicioUpdate, _: Usuario = Depends(require_roles(1, 2)), db: Session = Depends(get_db)):
     service = db.get(Servicio, service_id)
     if not service: raise HTTPException(status_code=404, detail="Servicio no encontrado")
     for key, value in payload.model_dump().items(): setattr(service, key, value)

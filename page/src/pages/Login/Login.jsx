@@ -81,7 +81,7 @@ export function Login() {
 
       if (!response.ok) {
         throw new Error(
-          data.message || 'No se pudo iniciar sesión.'
+          data.message || 'Could not sign in.'
         );
       }
 
@@ -98,14 +98,14 @@ export function Login() {
               form.remember
         );
 
-      console.log('Login exitoso:', data);
+      console.log('Sign-in successful:', data);
 
       navigate('/');
     } catch (error) {
-      console.error('Error al iniciar sesión:', error);
+      console.error('Sign-in error:', error);
 
       setServerError(
-        error.message || 'Error al conectar con el servidor.'
+        error.message || 'Could not connect to the server.'
       );
     } finally {
       setLoading(false);
@@ -205,8 +205,8 @@ export function Login() {
               {touched.email && !emailValid && (
                 <p className="mt-2 text-xs text-red-300/80">
                   {form.email.length === 0
-                    ? 'El correo electrónico es obligatorio.'
-                    : 'Ingresa un correo electrónico válido.'}
+                    ? 'Email address is required.'
+                    : 'Enter a valid email address.'}
                 </p>
               )}
 
@@ -261,8 +261,8 @@ export function Login() {
               {touched.password && !passwordValid && (
                 <p className="mt-2 text-xs text-red-300/80">
                   {form.password.length === 0
-                    ? 'La contraseña es obligatoria.'
-                    : 'La contraseña debe tener al menos 6 caracteres.'}
+                    ? 'Password is required.'
+                    : 'Password must be at least 6 characters.'}
                 </p>
               )}
 
@@ -283,7 +283,7 @@ export function Login() {
                 />
 
                 <span className="text-xs text-white/50">
-                  Recordarme
+                  Remember me
                 </span>
 
               </label>
@@ -292,7 +292,7 @@ export function Login() {
                 to="/forgot-password"
                 className="text-xs text-white/40 transition hover:text-[#9caf88]"
               >
-                ¿Olvidaste tu contraseña?
+                Forgot your password?
               </Link>
 
             </div>
@@ -309,8 +309,8 @@ export function Login() {
               }`}
             >
               {loading
-                ? 'Iniciando sesión...'
-                : 'Iniciar sesión'}
+                ? 'Signing in...'
+                : 'Sign in'}
             </button>
 
           </form>
@@ -333,7 +333,7 @@ export function Login() {
             to="/register"
             className="mt-5 block w-full border border-white/10 py-3.5 text-center text-xs uppercase tracking-[0.25em] text-white/60 transition duration-300 hover:border-[#9caf88]/50 hover:bg-[#9caf88]/5 hover:text-[#b7c7a5]"
           >
-            Crear una cuenta
+            Create an account
           </Link>
 
           {/* Nota */}

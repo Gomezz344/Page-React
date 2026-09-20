@@ -12,14 +12,13 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-Configura `DATABASE_URL` en `.env` con MySQL, por ejemplo:
+Configura `DATABASE_URL` en `.env` con PostgreSQL, por ejemplo:
 
 ```text
-mysql+pymysql://root:password@127.0.0.1:3306/wildlife_db
+postgresql+psycopg://postgres:TU_PASSWORD@localhost:5432/wildlife_db
 ```
 
-En XAMPP, si `root` no tiene contraseña, usa `mysql+pymysql://root:@127.0.0.1:3306/wildlife_db`.
-Para pruebas aisladas sin MySQL se puede usar `sqlite:///./wildlife.db`.
+Si tu PostgreSQL usa otro usuario/contraseña, ajusta la cadena de conexión. Para pruebas aisladas se puede usar `sqlite:///./wildlife.db`.
 
 ## Ejecutar
 

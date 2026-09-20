@@ -14,6 +14,8 @@ import { Wildlife } from './pages/Wildlife/Wildlife'
 import { Profile } from './pages/Profile/Profile'
 import { ForgotPassword } from './pages/ForgotPassword/ForgotPassword.jsx'
 import { Shop } from './pages/Shop/Shop.jsx'
+import { PagoExitoso } from './pages/Checkout/PagoExitoso.jsx'
+import { PagoCancelado } from './pages/Checkout/PagoCancelado.jsx'
 
 import { Admin } from './pages/Admin/Admin'
 import { ProtectedRoute } from './components/Auth/ProtectedRoute'
@@ -91,6 +93,16 @@ function App() {
           element={<ForgotPassword />}
         />
 
+        <Route
+          path="/pago-exitoso"
+          element={<PagoExitoso />}
+        />
+
+        <Route
+          path="/pago-cancelado"
+          element={<PagoCancelado />}
+        />
+
         {/* =========================
             ADMIN
         ========================== */}
@@ -98,7 +110,7 @@ function App() {
         <Route
           path="/admin/*"
           element={
-            <ProtectedRoute requiredRole={1}>
+            <ProtectedRoute allowedRoles={[1, 2]}>
               <Admin />
             </ProtectedRoute>
           }

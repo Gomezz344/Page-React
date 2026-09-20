@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ..core.deps import require_role
+from ..core.deps import require_role, require_roles
 from ..database import get_db
 from ..models import Producto, Usuario
 from ..schemas.common import ProductoCreate, ProductoOut, ProductoUpdate
@@ -21,7 +21,7 @@ def create_product(payload: ProductoCreate, _: Usuario = Depends(require_role(1)
 
 
 @router.put("/{product_id}", response_model=ProductoOut)
-def update_product(product_id: int, payload: ProductoUpdate, _: Usuario = Depends(require_role(1)), db: Session = Depends(get_db)):
+def update_product(product_id: int, payload: ProductoUpdate, _: Usuario = Depends(require_roles(1, 2)), db: Session = Depends(get_db)):
     product = db.get(Producto, product_id)
     if not product: raise HTTPException(status_code=404, detail="Producto no encontrado")
     for key, value in payload.model_dump().items(): setattr(product, key, value)

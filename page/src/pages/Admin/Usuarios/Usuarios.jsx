@@ -73,7 +73,7 @@ export function Usuarios() {
 
         throw new Error(
           data.message ||
-          'Error al obtener los usuarios.'
+          'Could not load the users.'
         );
 
       }
@@ -83,7 +83,7 @@ export function Usuarios() {
     } catch (error) {
 
       console.error(
-        'Error al cargar usuarios:',
+        'Error loading users:',
         error
       );
 
@@ -269,7 +269,7 @@ export function Usuarios() {
 
         throw new Error(
           data.message ||
-          'No se pudo actualizar el usuario.'
+          'Could not update the user.'
         );
 
       }
@@ -350,16 +350,16 @@ export function Usuarios() {
     switch (Number(rolId)) {
 
       case 1:
-        return 'Administrador';
+        return 'Administrator';
 
       case 2:
-        return 'Empleado';
+        return 'Employee';
 
       case 3:
-        return 'Cliente';
+        return 'Customer';
 
       default:
-        return 'Desconocido';
+        return 'Unknown';
 
     }
 
@@ -383,7 +383,7 @@ export function Usuarios() {
           </p>
 
           <h2 className="text-3xl font-light tracking-wide">
-            Usuarios
+            Users
           </h2>
 
         </div>
@@ -392,7 +392,7 @@ export function Usuarios() {
         <div className="border border-white/10 bg-white/[0.02] p-10 text-center">
 
           <p className="text-sm text-white/40">
-            Cargando usuarios...
+            Loading users...
           </p>
 
         </div>
@@ -419,11 +419,11 @@ export function Usuarios() {
         </p>
 
         <h2 className="text-3xl font-light tracking-wide">
-          Usuarios
+          Users
         </h2>
 
         <p className="mt-3 text-sm text-white/40">
-          Gestión de los usuarios registrados en Wildlife.
+          Manage registered Wildlife users.
         </p>
 
       </div>
@@ -461,27 +461,27 @@ export function Usuarios() {
               <tr className="text-left">
 
                 <th className="px-6 py-5 text-[9px] uppercase tracking-[0.25em] text-white/30">
-                  Usuario
+                  User
                 </th>
 
                 <th className="px-6 py-5 text-[9px] uppercase tracking-[0.25em] text-white/30">
-                  Documento
+                  Document
                 </th>
 
                 <th className="px-6 py-5 text-[9px] uppercase tracking-[0.25em] text-white/30">
-                  Contacto
+                  Contact
                 </th>
 
                 <th className="px-6 py-5 text-[9px] uppercase tracking-[0.25em] text-white/30">
-                  Rol
+                  Role
                 </th>
 
                 <th className="px-6 py-5 text-[9px] uppercase tracking-[0.25em] text-white/30">
-                  Estado
+                  Status
                 </th>
 
                 <th className="px-6 py-5 text-right text-[9px] uppercase tracking-[0.25em] text-white/30">
-                  Acciones
+                  Actions
                 </th>
 
               </tr>
@@ -501,7 +501,7 @@ export function Usuarios() {
                   >
 
                     <p className="text-sm text-white/30">
-                      No hay usuarios registrados.
+                      No registered users.
                     </p>
 
                   </td>
@@ -539,7 +539,7 @@ export function Usuarios() {
                             {esActual && (
 
                               <span className="border border-[#9caf88]/20 bg-[#9caf88]/5 px-2 py-1 text-[8px] uppercase tracking-wider text-[#9caf88]">
-                                Tú
+                                You
                               </span>
 
                             )}
@@ -607,13 +607,13 @@ export function Usuarios() {
                         {Number(usuario.estado) === 1 ? (
 
                           <span className="border border-[#9caf88]/20 bg-[#9caf88]/5 px-3 py-1 text-[9px] uppercase tracking-wider text-[#9caf88]">
-                            Activo
+                            Active
                           </span>
 
                         ) : (
 
                           <span className="border border-white/10 bg-white/5 px-3 py-1 text-[9px] uppercase tracking-wider text-white/30">
-                            Inactivo
+                            Inactive
                           </span>
 
                         )}
@@ -682,8 +682,8 @@ export function Usuarios() {
 
                 <h3 className="mt-2 text-2xl font-light">
                   {esUsuarioActual
-                    ? 'Editar mi cuenta'
-                    : 'Editar usuario'}
+                    ? 'Edit my account'
+                    : 'Edit user'}
                 </h3>
 
               </div>
@@ -708,9 +708,9 @@ export function Usuarios() {
               <div className="mx-8 mt-6 border border-[#9caf88]/20 bg-[#9caf88]/5 px-5 py-4">
 
                 <p className="text-xs leading-6 text-[#b7c7a5]">
-                  Estás editando tu propia cuenta.
+                  You are editing your own account.
                   Por seguridad, tu rol y estado no pueden
-                  modificarse desde aquí.
+                  cannot be changed here.
                 </p>
 
               </div>
@@ -733,7 +733,7 @@ export function Usuarios() {
                 <div>
 
                   <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                    Nombre
+                    First name
                   </label>
 
                   <input
@@ -742,7 +742,7 @@ export function Usuarios() {
                     onChange={handleChange}
                     required
                     className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
-                    placeholder="Nombre"
+                    placeholder="First name"
                   />
 
                 </div>
@@ -751,7 +751,7 @@ export function Usuarios() {
                 <div>
 
                   <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                    Apellido
+                    Last name
                   </label>
 
                   <input
@@ -760,7 +760,7 @@ export function Usuarios() {
                     onChange={handleChange}
                     required
                     className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
-                    placeholder="Apellido"
+                    placeholder="Last name"
                   />
 
                 </div>
@@ -791,7 +791,7 @@ export function Usuarios() {
                     </option>
 
                     <option value="CC">
-                      Cédula de ciudadanía
+                      National ID
                     </option>
 
                     <option value="TI">
@@ -799,7 +799,7 @@ export function Usuarios() {
                     </option>
 
                     <option value="CE">
-                      Cédula de extranjería
+                      Foreign ID
                     </option>
 
                     <option value="Pasaporte">
@@ -814,7 +814,7 @@ export function Usuarios() {
                 <div>
 
                   <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                    Número de documento
+                    Document number
                   </label>
 
                   <input
@@ -823,7 +823,7 @@ export function Usuarios() {
                     onChange={handleChange}
                     required
                     className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
-                    placeholder="Número de documento"
+                    placeholder="Document number"
                   />
 
                 </div>

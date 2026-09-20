@@ -1,6 +1,9 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 export function AdminSidebar() {
+  const { usuario } = useAuth();
+  const isAdmin = Number(usuario?.rol_id) === 1;
   const links = [
     {
       to: '/admin',
@@ -9,16 +12,16 @@ export function AdminSidebar() {
     },
     {
       to: '/admin/productos',
-      label: 'Productos',
+      label: 'Products',
     },
     {
       to: '/admin/servicios',
-      label: 'Servicios',
+      label: 'Services',
     },
-    {
+    ...(isAdmin ? [{
       to: '/admin/usuarios',
-      label: 'Usuarios',
-    },
+      label: 'Users',
+    }] : []),
   ];
 
   return (
@@ -77,7 +80,7 @@ export function AdminSidebar() {
           to="/"
           className="block text-center text-[10px] uppercase tracking-[0.2em] text-white/30 transition hover:text-[#9caf88]"
         >
-          ← Volver al sitio
+          ← Back to website
         </NavLink>
 
       </div>

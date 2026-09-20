@@ -44,22 +44,22 @@ const Input = ({
       {touched[name] && !validations[name] && (
         <p className="mt-2 text-xs text-red-300/80">
           {name === 'firstName' &&
-            'El nombre es obligatorio.'}
+            'First name is required.'}
 
           {name === 'lastName' &&
-            'El apellido es obligatorio.'}
+            'Last name is required.'}
 
           {name === 'documentNumber' &&
-            'Ingresa un número de documento válido.'}
+            'Enter a valid document number.'}
 
           {name === 'address' &&
-            'Ingresa una dirección válida.'}
+            'Enter a valid address.'}
 
           {name === 'phone' &&
-            'Ingresa un número de teléfono válido.'}
+            'Enter a valid phone number.'}
 
           {name === 'email' &&
-            'Ingresa un correo electrónico válido.'}
+            'Enter a valid email address.'}
         </p>
       )}
     </div>

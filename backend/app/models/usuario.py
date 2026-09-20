@@ -19,3 +19,5 @@ class Usuario(Base):
     rol_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), nullable=False, default=3)
     estado: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     rol: Mapped["Rol"] = relationship(back_populates="usuarios")
+    reservas: Mapped[list["Reserva"]] = relationship(back_populates="usuario")
+    pagos: Mapped[list["Pago"]] = relationship(back_populates="usuario")

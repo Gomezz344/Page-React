@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from .config import settings
 from .database import Base, engine
 from . import models
-from .routers import admin, auth, catalog, productos, servicios, usuarios
+from .routers import admin, auth, carrito, catalog, pagos, productos, reservas, servicios, usuarios
 
 app = FastAPI(title="Wildlife API", version="1.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origin_list, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -20,6 +20,9 @@ app.include_router(catalog.permisos_router)
 app.include_router(productos.router)
 app.include_router(servicios.router)
 app.include_router(admin.router)
+app.include_router(carrito.router)
+app.include_router(reservas.router)
+app.include_router(pagos.router)
 
 
 @app.on_event("startup")
@@ -29,10 +32,6 @@ def create_tables() -> None:
     if "stock" not in columns:
         with engine.begin() as connection:
             connection.execute(text("ALTER TABLE servicios ADD COLUMN stock INTEGER NOT NULL DEFAULT 10"))
-
-
-create_tables()
-
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(_: Request, exc):

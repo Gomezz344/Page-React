@@ -35,7 +35,7 @@ export function Tours() {
 
         throw new Error(
           data.message ||
-          'No se pudieron obtener los tours.'
+            'Could not load the tours.'
         );
 
       }
@@ -54,12 +54,12 @@ export function Tours() {
     } catch (error) {
 
       console.error(
-        'Error al cargar tours:',
+        'Error loading tours:',
         error
       );
 
       setError(
-        'No pudimos cargar las experiencias en este momento.'
+        'We could not load the experiences right now.'
       );
 
     } finally {
@@ -89,7 +89,7 @@ export function Tours() {
   const formatearPrecio = (precio) => {
 
     return new Intl.NumberFormat(
-      'es-CO',
+      'en-US',
       {
         style: 'currency',
         currency: 'COP',
@@ -119,7 +119,7 @@ export function Tours() {
             </p>
 
             <p className="mt-4 text-sm text-white/40">
-              Descubriendo experiencias...
+              Discovering experiences...
             </p>
 
           </div>
@@ -152,7 +152,7 @@ export function Tours() {
             </p>
 
             <h1 className="mt-5 text-3xl font-light">
-              Algo salió mal
+              Something went wrong
             </h1>
 
             <p className="mt-4 text-sm leading-7 text-white/40">
@@ -163,7 +163,7 @@ export function Tours() {
               onClick={cargarTours}
               className="mt-8 border border-white/10 px-6 py-3 text-[10px] uppercase tracking-[0.25em] text-white/60 transition hover:border-[#9caf88]/40 hover:text-[#9caf88]"
             >
-              Intentar nuevamente
+              Try again
             </button>
 
           </div>
@@ -198,7 +198,7 @@ export function Tours() {
 
           <img
             src= {HeroImg}
-            alt="Experiencia Wildlife"
+            alt="Wildlife experience"
             className="h-full w-full object-cover"
           />
 
@@ -219,20 +219,20 @@ export function Tours() {
 
           <h1 className="max-w-4xl text-5xl font-light leading-[1.05] tracking-tight md:text-7xl">
 
-            La naturaleza
+            Nature
             <br />
 
             <span className="text-white/50">
-              espera ser descubierta.
+              is waiting to be discovered.
             </span>
 
           </h1>
 
           <p className="mt-7 max-w-xl text-sm leading-7 text-white/60 md:text-base">
 
-            Explora la vida salvaje desde una perspectiva
-            diferente. Viaja, observa y descubre sin dejar
-            de respetar el mundo que nos rodea.
+            Explore wildlife from a different perspective.
+            Travel, observe and discover while respecting
+            the world around us.
 
           </p>
 
@@ -252,16 +252,16 @@ export function Tours() {
           <div>
 
             <p className="text-[10px] uppercase tracking-[0.4em] text-[#9caf88]">
-              Nuestras experiencias
+              Our experiences
             </p>
 
             <h2 className="mt-5 text-3xl font-light leading-tight md:text-4xl">
 
-              Más que un tour,
+              More than a tour,
               <br />
 
               <span className="text-white/40">
-                una conexión.
+                a connection.
               </span>
 
             </h2>
@@ -273,17 +273,16 @@ export function Tours() {
 
             <p className="text-base leading-8 text-white/50">
 
-              Cada experiencia Wildlife está pensada para
-              acercarte a la naturaleza de una manera
-              responsable.
+              Every Wildlife experience is designed to bring
+              you closer to nature responsibly.
 
             </p>
 
             <p className="mt-5 text-base leading-8 text-white/50">
 
-              No se trata solamente de llegar a un destino.
-              Se trata de detenerse, observar y comprender
-              la vida que existe alrededor de nosotros.
+              It is not only about reaching a destination.
+              It is about pausing, observing and understanding
+              the life around us.
 
             </p>
 
@@ -305,11 +304,11 @@ export function Tours() {
           <div>
 
             <p className="text-[10px] uppercase tracking-[0.35em] text-white/30">
-              Experiencias disponibles
+              Available experiences
             </p>
 
             <h2 className="mt-3 text-2xl font-light">
-              Explora nuestros tours
+              Explore our tours
             </h2>
 
           </div>
@@ -317,8 +316,8 @@ export function Tours() {
           <span className="hidden text-xs text-white/25 md:block">
             {servicios.length}{' '}
             {servicios.length === 1
-              ? 'experiencia'
-              : 'experiencias'}
+              ? 'experience'
+              : 'experiences'}
           </span>
 
         </div>
@@ -329,7 +328,7 @@ export function Tours() {
           <div className="border border-white/10 bg-white/[0.02] px-6 py-20 text-center">
 
             <p className="text-sm text-white/30">
-              Actualmente no hay experiencias disponibles.
+              No experiences are currently available.
             </p>
 
           </div>

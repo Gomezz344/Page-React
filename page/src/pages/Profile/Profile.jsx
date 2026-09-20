@@ -28,6 +28,10 @@ export function Profile() {
 
   const [mensaje, setMensaje] = useState('');
 
+  const [reservas, setReservas] = useState([]);
+
+  const [cargandoReservas, setCargandoReservas] = useState(false);
+
 
   // ==========================================
   // FORMULARIO
@@ -70,7 +74,7 @@ export function Profile() {
 
         throw new Error(
           data.message ||
-          'No se pudo obtener el perfil.'
+          'Could not load the profile.'
         );
 
       }
@@ -91,12 +95,12 @@ export function Profile() {
     } catch (error) {
 
       console.error(
-        'Error al cargar perfil:',
+        'Error loading profile:',
         error
       );
 
       setError(
-        'No pudimos cargar tu información.'
+        'We could not load your information.'
       );
 
     } finally {
@@ -116,9 +120,58 @@ export function Profile() {
 
     if (token) {
       cargarPerfil();
+      cargarReservas();
     }
 
   }, [token]);
+
+  const cargarReservas = async () => {
+
+    if (!token) {
+      setReservas([]);
+      return;
+    }
+
+    try {
+
+      setCargandoReservas(true);
+
+      const response = await fetch(
+        `${API_URL}/reservas/me`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+          'Could not load your reservations.'
+        );
+      }
+
+      setReservas(data.reservas || []);
+
+    } catch (error) {
+
+      console.error(
+        'Error loading reservations:',
+        error
+      );
+
+      setReservas([]);
+
+    } finally {
+
+      setCargandoReservas(false);
+
+    }
+
+  };
 
 
   // ==========================================
@@ -174,7 +227,7 @@ export function Profile() {
 
         throw new Error(
           data.message ||
-          'No se pudo actualizar el perfil.'
+          'Could not update the profile.'
         );
 
       }
@@ -195,7 +248,7 @@ export function Profile() {
 
 
       setMensaje(
-        'Perfil actualizado correctamente.'
+        'Profile updated successfully.'
       );
 
 
@@ -205,13 +258,13 @@ export function Profile() {
     } catch (error) {
 
       console.error(
-        'Error al actualizar perfil:',
+        'Error updating profile:',
         error
       );
 
       setError(
         error.message ||
-        'No pudimos actualizar tu perfil.'
+        'We could not update your profile.'
       );
 
     } finally {
@@ -242,7 +295,7 @@ export function Profile() {
             </p>
 
             <p className="mt-4 text-sm text-white/40">
-              Cargando perfil...
+              Loading profile...
             </p>
 
           </div>
@@ -275,7 +328,7 @@ export function Profile() {
             </p>
 
             <h1 className="mt-5 text-3xl font-light">
-              No pudimos cargar tu perfil
+              We could not load your profile
             </h1>
 
             <p className="mt-4 text-sm leading-7 text-white/40">
@@ -287,7 +340,7 @@ export function Profile() {
               onClick={cargarPerfil}
               className="mt-8 border border-white/10 px-6 py-3 text-[10px] uppercase tracking-[0.25em] text-white/60 transition hover:border-[#9caf88]/40 hover:text-[#9caf88]"
             >
-              Intentar nuevamente
+              Try again
             </button>
 
           </div>
@@ -327,12 +380,12 @@ export function Profile() {
             <div>
 
               <h1 className="text-4xl font-light tracking-tight md:text-5xl">
-                Mi perfil
+                My profile
               </h1>
 
               <p className="mt-4 max-w-xl text-sm leading-7 text-white/40">
-                Administra tu información personal y mantén
-                tus datos actualizados.
+                Manage your personal information and keep
+                your details up to date.
               </p>
 
             </div>
@@ -342,7 +395,7 @@ export function Profile() {
               to="/tours"
               className="inline-flex w-fit border border-white/10 px-5 py-3 text-[9px] uppercase tracking-[0.25em] text-white/50 transition hover:border-[#9caf88]/40 hover:text-[#9caf88]"
             >
-              Explorar experiencias
+              Explore experiences
             </Link>
 
           </div>
@@ -426,16 +479,74 @@ export function Profile() {
                 <p className="mt-2 text-sm text-white/60">
 
                   {Number(perfil?.rol_id) === 1
-                    ? 'Administrador'
+                    ? 'Administrator'
                     : Number(perfil?.rol_id) === 2
-                    ? 'Empleado'
-                    : 'Cliente'}
+                    ? 'Employee'
+                    : 'Customer'}
 
                 </p>
 
               </div>
 
             </div>
+
+          </div>
+
+
+          {/* RESERVAS */}
+
+          <div className="border border-white/10 bg-white/[0.02] p-7 md:col-span-2">
+
+            <div className="flex items-center justify-between gap-4">
+
+              <div>
+
+                <p className="text-[9px] uppercase tracking-[0.35em] text-white/25">
+                  Reservations
+                </p>
+
+                <h2 className="mt-3 text-xl font-light">
+                  My bookings
+                </h2>
+
+              </div>
+
+              <Link
+                to="/tours"
+                className="inline-flex border border-white/10 px-4 py-2 text-[9px] uppercase tracking-[0.2em] text-white/50 transition hover:border-[#9caf88]/40 hover:text-[#9caf88]"
+              >
+                Book more
+              </Link>
+
+            </div>
+
+            {cargandoReservas ? (
+              <p className="mt-6 text-sm text-white/40">Loading reservations...</p>
+            ) : reservas.length === 0 ? (
+              <div className="mt-6 rounded-xl border border-dashed border-white/10 bg-[#07100b]/60 p-6 text-sm text-white/45">
+                No reservations yet. Explore the experiences and live something unforgettable.
+              </div>
+            ) : (
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                {reservas.map((reserva) => (
+                  <article key={reserva.id} className="rounded-2xl border border-white/10 bg-[#08140d]/80 p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[9px] uppercase tracking-[0.25em] text-[#9caf88]">Booking #{reserva.id}</p>
+                      <span className="rounded-full border border-[#9caf88]/40 bg-[#9caf88]/10 px-2 py-1 text-[8px] uppercase tracking-[0.2em] text-[#cfe2c7]">
+                        {reserva.estado}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 space-y-2 text-sm text-white/70">
+                      <p><span className="text-white/35">Service:</span> {reserva.servicio_id}</p>
+                      <p><span className="text-white/35">Guests:</span> {reserva.cantidad_personas}</p>
+                      <p><span className="text-white/35">Dates:</span> {reserva.fecha_inicio} {reserva.fecha_fin ? `- ${reserva.fecha_fin}` : ''}</p>
+                      <p><span className="text-white/35">Total:</span> {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(reserva.monto_total || 0)}</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
 
           </div>
 
@@ -449,11 +560,11 @@ export function Profile() {
               <div>
 
                 <p className="text-[9px] uppercase tracking-[0.35em] text-white/25">
-                  Información personal
+                  Personal information
                 </p>
 
                 <h2 className="mt-3 text-xl font-light">
-                  Tus datos
+                  Your details
                 </h2>
 
               </div>
@@ -470,7 +581,7 @@ export function Profile() {
                   }}
                   className="border border-white/10 px-4 py-2 text-[9px] uppercase tracking-[0.2em] text-white/50 transition hover:border-[#9caf88]/40 hover:text-[#9caf88]"
                 >
-                  Editar
+                  Edit
                 </button>
 
               )}
@@ -490,7 +601,7 @@ export function Profile() {
                 <div>
 
                   <label className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                    Nombre
+                    First name
                   </label>
 
                   <input
@@ -510,7 +621,7 @@ export function Profile() {
                 <div>
 
                   <label className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                    Apellido
+                    Last name
                   </label>
 
                   <input
@@ -530,7 +641,7 @@ export function Profile() {
                 <div>
 
                   <label className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                    Correo electrónico
+                    Email address
                   </label>
 
                   <input
@@ -550,7 +661,7 @@ export function Profile() {
                 <div>
 
                   <label className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                    Teléfono
+                    Phone
                   </label>
 
                   <input
@@ -570,7 +681,7 @@ export function Profile() {
                 <div>
 
                   <label className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                    Dirección
+                    Address
                   </label>
 
                   <input
@@ -595,8 +706,8 @@ export function Profile() {
                     className="border border-[#9caf88]/30 bg-[#9caf88]/5 px-5 py-3 text-[9px] uppercase tracking-[0.25em] text-[#b7c7a5] transition hover:bg-[#9caf88]/10 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {guardando
-                      ? 'Guardando...'
-                      : 'Guardar cambios'}
+                      ? 'Saving...'
+                      : 'Save changes'}
                   </button>
 
 
@@ -619,7 +730,7 @@ export function Profile() {
                     }}
                     className="border border-white/10 px-5 py-3 text-[9px] uppercase tracking-[0.25em] text-white/40 transition hover:border-white/20 hover:text-white/60"
                   >
-                    Cancelar
+                    Cancel
                   </button>
 
                 </div>
@@ -636,7 +747,7 @@ export function Profile() {
                 <div className="border-b border-white/10 pb-5">
 
                   <p className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                    Nombre completo
+                    Full name
                   </p>
 
                   <p className="mt-2 text-sm text-white/70">
@@ -651,7 +762,7 @@ export function Profile() {
                 <div className="border-b border-white/10 pb-5">
 
                   <p className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                    Correo electrónico
+                    Email address
                   </p>
 
                   <p className="mt-2 break-all text-sm text-white/70">
@@ -666,11 +777,11 @@ export function Profile() {
                 <div className="border-b border-white/10 pb-5">
 
                   <p className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                    Teléfono
+                    Phone
                   </p>
 
                   <p className="mt-2 text-sm text-white/70">
-                    {perfil?.telefono || 'No registrado'}
+                    {perfil?.telefono || 'Not provided'}
                   </p>
 
                 </div>
@@ -681,11 +792,11 @@ export function Profile() {
                 <div className="border-b border-white/10 pb-5">
 
                   <p className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                    Dirección
+                    Address
                   </p>
 
                   <p className="mt-2 text-sm text-white/70">
-                    {perfil?.direccion || 'No registrada'}
+                    {perfil?.direccion || 'Not provided'}
                   </p>
 
                 </div>
@@ -698,7 +809,7 @@ export function Profile() {
                   <div>
 
                     <p className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                      Tipo de documento
+                      Document type
                     </p>
 
                     <p className="mt-2 text-sm text-white/70">
@@ -711,7 +822,7 @@ export function Profile() {
                   <div>
 
                     <p className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                      Número de documento
+                      Document number
                     </p>
 
                     <p className="mt-2 text-sm text-white/70">
@@ -728,7 +839,7 @@ export function Profile() {
                 <div className="border-t border-white/10 pt-6">
 
                   <p className="text-[8px] uppercase tracking-[0.25em] text-white/25">
-                    Miembro desde
+                    Member since
                   </p>
 
                   <p className="mt-2 text-sm text-white/70">
@@ -736,14 +847,14 @@ export function Profile() {
                       ? new Date(
                           perfil.fecha_registro
                         ).toLocaleDateString(
-                          'es-CO',
+                          'en-US',
                           {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',
                           }
                         )
-                      : 'No disponible'}
+                      : 'Not available'}
                   </p>
 
                 </div>

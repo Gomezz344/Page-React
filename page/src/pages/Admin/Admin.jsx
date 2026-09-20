@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { API_URL } from '../../api/client';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Navigate, Routes, Route, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 import { AdminSidebar } from '../../components/Admin/AdminSideBar';
 import { AdminHeader } from '../../components/Admin/AdminHeader';
@@ -12,6 +13,8 @@ import { Usuarios } from './Usuarios/Usuarios';
 export function Admin() {
 
   const location = useLocation();
+  const { usuario } = useAuth();
+  const isAdmin = Number(usuario?.rol_id) === 1;
 
   // ==========================================
   // ESTADÍSTICAS
@@ -59,7 +62,7 @@ export function Admin() {
 
         throw new Error(
           data.message ||
-          'No se pudieron obtener las estadísticas.'
+          'Could not load the statistics.'
         );
 
       }
@@ -147,7 +150,7 @@ export function Admin() {
                     </h2>
 
                     <p className="mt-3 text-sm text-white/40">
-                      Bienvenido al panel de administración de Wildlife.
+                      Welcome to the Wildlife management panel.
                     </p>
 
                   </div>
@@ -165,7 +168,7 @@ export function Admin() {
                     <div className="border border-white/10 bg-white/[0.02] p-6 transition hover:border-[#9caf88]/30">
 
                       <p className="text-[9px] uppercase tracking-[0.25em] text-white/30">
-                        Usuarios
+                        Users
                       </p>
 
 
@@ -179,7 +182,7 @@ export function Admin() {
 
 
                       <p className="mt-2 text-xs text-white/20">
-                        Registrados
+                        Registered
                       </p>
 
                     </div>
@@ -192,7 +195,7 @@ export function Admin() {
                     <div className="border border-white/10 bg-white/[0.02] p-6 transition hover:border-[#9caf88]/30">
 
                       <p className="text-[9px] uppercase tracking-[0.25em] text-white/30">
-                        Productos
+                        Products
                       </p>
 
 
@@ -206,7 +209,7 @@ export function Admin() {
 
 
                       <p className="mt-2 text-xs text-white/20">
-                        En inventario
+                        In inventory
                       </p>
 
                     </div>
@@ -219,7 +222,7 @@ export function Admin() {
                     <div className="border border-white/10 bg-white/[0.02] p-6 transition hover:border-[#9caf88]/30">
 
                       <p className="text-[9px] uppercase tracking-[0.25em] text-white/30">
-                        Servicios
+                        Services
                       </p>
 
 
@@ -233,7 +236,7 @@ export function Admin() {
 
 
                       <p className="mt-2 text-xs text-white/20">
-                        Disponibles
+                        Available
                       </p>
 
                     </div>
@@ -272,7 +275,7 @@ export function Admin() {
 
             <Route
               path="/usuarios"
-              element={<Usuarios/>}
+              element={isAdmin ? <Usuarios /> : <Navigate to="/admin/productos" replace />}
             />
 
           </Routes>

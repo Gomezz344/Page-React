@@ -112,17 +112,17 @@ export function Register() {
 
       if (!response.ok) {
         setServerMessage(
-          data.message || 'Error al registrar el usuario.'
+          data.message || 'Could not create the account.'
         );
         return;
       }
 
       setRegistered(true);
     } catch (error) {
-      console.error('Error de conexión:', error);
+      console.error('Connection error:', error);
 
       setServerMessage(
-        'No se pudo conectar con el servidor.'
+        'Could not connect to the server.'
       );
     } finally {
       setLoading(false);
@@ -230,15 +230,15 @@ export function Register() {
                     <Input
                       {...inputProps}
                       name="firstName"
-                      label="Nombre"
-                      placeholder="Tu nombre"
+                      label="First name"
+                      placeholder="Your first name"
                     />
 
                     <Input
                       {...inputProps}
                       name="lastName"
-                      label="Apellido"
-                      placeholder="Tu apellido"
+                      label="Last name"
+                      placeholder="Your last name"
                     />
 
                   </div>
@@ -275,7 +275,7 @@ export function Register() {
                         htmlFor="documentType"
                         className="mb-2 block text-[10px] uppercase tracking-[0.25em] text-white/50"
                       >
-                        Tipo de documento
+                        Document type
                       </label>
 
                       <select
@@ -292,19 +292,19 @@ export function Register() {
                       >
 
                         <option value="">
-                          Selecciona una opción
+                          Select an option
                         </option>
 
                         <option value="CC">
-                          Cédula de ciudadanía
+                          National ID
                         </option>
 
                         <option value="CE">
-                          Cédula de extranjería
+                          Foreign ID
                         </option>
 
                         <option value="TI">
-                          Tarjeta de identidad
+                          Identity card
                         </option>
 
                         <option value="PASSPORT">
@@ -316,7 +316,7 @@ export function Register() {
                       {touched.documentType &&
                         !validations.documentType && (
                           <p className="mt-2 text-xs text-red-300/80">
-                            Selecciona un tipo de documento.
+                            Select a document type.
                           </p>
                         )}
 
@@ -325,7 +325,7 @@ export function Register() {
                     <Input
                       {...inputProps}
                       name="documentNumber"
-                      label="Número de documento"
+                      label="Document number"
                       placeholder="1234567890"
                       type="text"
                     />
@@ -359,7 +359,7 @@ export function Register() {
                     <Input
                       {...inputProps}
                       name="address"
-                      label="Dirección"
+                      label="Address"
                       placeholder="Calle 00 #00-00"
                     />
 
@@ -368,7 +368,7 @@ export function Register() {
                       <Input
                         {...inputProps}
                         name="phone"
-                        label="Teléfono"
+                        label="Phone"
                         placeholder="3001234567"
                         type="tel"
                       />
@@ -376,7 +376,7 @@ export function Register() {
                       <Input
                         {...inputProps}
                         name="email"
-                        label="Correo electrónico"
+                        label="Email address"
                         placeholder="you@example.com"
                         type="email"
                       />
@@ -417,7 +417,7 @@ export function Register() {
                         htmlFor="password"
                         className="mb-2 block text-[10px] uppercase tracking-[0.25em] text-white/50"
                       >
-                        Contraseña
+                        Password
                       </label>
 
                       <div className="relative">
@@ -460,8 +460,7 @@ export function Register() {
                       {touched.password &&
                         !validations.password && (
                           <p className="mt-2 text-xs text-red-300/80">
-                            La contraseña debe tener
-                            al menos 6 caracteres.
+                            Password must be at least 6 characters.
                           </p>
                         )}
 
@@ -475,7 +474,7 @@ export function Register() {
                         htmlFor="confirmPassword"
                         className="mb-2 block text-[10px] uppercase tracking-[0.25em] text-white/50"
                       >
-                        Confirmar contraseña
+                        Confirm password
                       </label>
 
                       <div className="relative">
@@ -520,7 +519,7 @@ export function Register() {
                       {touched.confirmPassword &&
                         !validations.confirmPassword && (
                           <p className="mt-2 text-xs text-red-300/80">
-                            Las contraseñas no coinciden.
+                            Passwords do not match.
                           </p>
                         )}
 

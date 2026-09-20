@@ -4,7 +4,8 @@ import { API_URL } from '../../../api/client';
 
 export function Productos() {
 
-  const { token } = useAuth();
+  const { token, usuario } = useAuth();
+  const isAdmin = Number(usuario?.rol_id) === 1;
 
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -49,7 +50,7 @@ export function Productos() {
 
       if (!response.ok) {
         throw new Error(
-          data.message || 'Error al obtener los productos.'
+          data.message || 'Could not load the products.'
         );
       }
 
@@ -156,7 +157,7 @@ export function Productos() {
     e.preventDefault();
 
     if (!token) {
-      setError('No hay una sesión autenticada.');
+      setError('No authenticated session found.');
       return;
     }
 
@@ -192,7 +193,7 @@ export function Productos() {
 
       if (!response.ok) {
         throw new Error(
-          data.message || 'No se pudo guardar el producto.'
+          data.message || 'Could not save the product.'
         );
       }
 
@@ -205,7 +206,7 @@ export function Productos() {
     } catch (error) {
 
       console.error(
-        'Error al guardar producto:',
+        'Error saving product:',
         error
       );
 
@@ -223,13 +224,13 @@ export function Productos() {
   const eliminarProducto = async (id) => {
 
     const confirmar = window.confirm(
-      '¿Seguro que quieres eliminar este producto?'
+      'Are you sure you want to delete this product?'
     );
 
     if (!confirmar) return;
 
     if (!token) {
-      setError('No hay una sesión autenticada.');
+      setError('No authenticated session found.');
       return;
     }
 
@@ -251,7 +252,7 @@ export function Productos() {
 
       if (!response.ok) {
         throw new Error(
-          data.message || 'No se pudo eliminar el producto.'
+          data.message || 'Could not delete the product.'
         );
       }
 
@@ -260,7 +261,7 @@ export function Productos() {
     } catch (error) {
 
       console.error(
-        'Error al eliminar producto:',
+        'Error deleting product:',
         error
       );
 
@@ -287,7 +288,7 @@ export function Productos() {
           </p>
 
           <h2 className="text-3xl font-light">
-            Productos
+            Products
           </h2>
 
         </div>
@@ -295,7 +296,7 @@ export function Productos() {
         <div className="border border-white/10 bg-white/[0.02] p-10 text-center">
 
           <p className="text-sm text-white/40">
-            Cargando productos...
+            Loading products...
           </p>
 
         </div>
@@ -322,21 +323,23 @@ export function Productos() {
           </p>
 
           <h2 className="text-3xl font-light tracking-wide">
-            Productos
+            Products
           </h2>
 
           <p className="mt-3 text-sm text-white/40">
-            Gestiona los productos disponibles en Wildlife.
+            Manage the products available in Wildlife.
           </p>
 
         </div>
 
-        <button
-          onClick={abrirCrear}
-          className="border border-[#9caf88]/40 bg-[#9caf88] px-6 py-3 text-xs uppercase tracking-[0.2em] text-[#07100b] transition hover:bg-[#b7c7a5]"
-        >
-          + Nuevo producto
-        </button>
+        {isAdmin && (
+          <button
+            onClick={abrirCrear}
+            className="border border-[#9caf88]/40 bg-[#9caf88] px-6 py-3 text-xs uppercase tracking-[0.2em] text-[#07100b] transition hover:bg-[#b7c7a5]"
+          >
+            + New product
+          </button>
+        )}
 
       </div>
 
@@ -408,15 +411,17 @@ export function Productos() {
                   >
 
                     <p className="text-sm text-white/30">
-                      No hay productos registrados.
+                      No products registered.
                     </p>
 
-                    <button
-                      onClick={abrirCrear}
-                      className="mt-4 text-xs uppercase tracking-[0.2em] text-[#9caf88] hover:text-[#b7c7a5]"
-                    >
-                      Crear el primero
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={abrirCrear}
+                        className="mt-4 text-xs uppercase tracking-[0.2em] text-[#9caf88] hover:text-[#b7c7a5]"
+                      >
+                        Create the first one
+                      </button>
+                    )}
 
                   </td>
 
@@ -464,7 +469,7 @@ export function Productos() {
                           </p>
 
                           <p className="mt-1 max-w-xs truncate text-xs text-white/30">
-                            {producto.descripcion || 'Sin descripción'}
+                            {producto.descripcion || 'No description'}
                           </p>
 
                         </div>
@@ -511,13 +516,13 @@ export function Productos() {
                       {producto.estado === 1 ? (
 
                         <span className="border border-[#9caf88]/20 bg-[#9caf88]/5 px-3 py-1 text-[9px] uppercase tracking-wider text-[#9caf88]">
-                          Activo
+                          Active
                         </span>
 
                       ) : (
 
                         <span className="border border-white/10 bg-white/5 px-3 py-1 text-[9px] uppercase tracking-wider text-white/30">
-                          Inactivo
+                          Inactive
                         </span>
 
                       )}
@@ -535,15 +540,17 @@ export function Productos() {
                           onClick={() => abrirEditar(producto)}
                           className="border border-white/10 px-4 py-2 text-[9px] uppercase tracking-wider text-white/50 transition hover:border-[#9caf88]/40 hover:text-[#9caf88]"
                         >
-                          Editar
+                          Edit
                         </button>
 
-                        <button
-                          onClick={() => eliminarProducto(producto.id)}
-                          className="border border-red-400/10 px-4 py-2 text-[9px] uppercase tracking-wider text-red-300/50 transition hover:border-red-400/30 hover:text-red-300"
-                        >
-                          Eliminar
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => eliminarProducto(producto.id)}
+                            className="border border-red-400/10 px-4 py-2 text-[9px] uppercase tracking-wider text-red-300/50 transition hover:border-red-400/30 hover:text-red-300"
+                          >
+                            Delete
+                          </button>
+                        )}
 
                       </div>
 
@@ -586,8 +593,8 @@ export function Productos() {
 
                 <h3 className="mt-2 text-2xl font-light">
                   {editando
-                    ? 'Editar producto'
-                    : 'Crear producto'}
+                    ? 'Edit product'
+                    : 'Create product'}
                 </h3>
 
               </div>
@@ -617,7 +624,7 @@ export function Productos() {
               <div>
 
                 <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                  Nombre
+                  Name
                 </label>
 
                 <input
@@ -626,7 +633,7 @@ export function Productos() {
                   onChange={handleChange}
                   required
                   className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
-                  placeholder="Nombre del producto"
+                  placeholder="Product name"
                 />
 
               </div>
@@ -637,7 +644,7 @@ export function Productos() {
               <div>
 
                 <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                  Descripción
+                  Description
                 </label>
 
                 <textarea
@@ -646,7 +653,7 @@ export function Productos() {
                   onChange={handleChange}
                   rows="4"
                   className="w-full resize-none border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
-                  placeholder="Descripción del producto"
+                  placeholder="Product description"
                 />
 
               </div>
@@ -659,7 +666,7 @@ export function Productos() {
                 <div>
 
                   <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                    Precio
+                    Price
                   </label>
 
                   <input
@@ -704,7 +711,7 @@ export function Productos() {
               <div>
 
                 <label className="mb-2 block text-[9px] uppercase tracking-[0.25em] text-white/40">
-                  URL de imagen
+                    Image URL
                 </label>
 
                 <input
@@ -736,11 +743,11 @@ export function Productos() {
                   >
 
                     <option value="1">
-                      Activo
+                      Active
                     </option>
 
                     <option value="0">
-                      Inactivo
+                      Inactive
                     </option>
 
                   </select>
@@ -762,7 +769,7 @@ export function Productos() {
                   }}
                   className="border border-white/10 px-6 py-3 text-xs uppercase tracking-[0.2em] text-white/50 transition hover:text-white"
                 >
-                  Cancelar
+                  Cancel
                 </button>
 
                 <button
@@ -770,8 +777,8 @@ export function Productos() {
                   className="bg-[#9caf88] px-6 py-3 text-xs uppercase tracking-[0.2em] text-[#07100b] transition hover:bg-[#b7c7a5]"
                 >
                   {editando
-                    ? 'Guardar cambios'
-                    : 'Crear producto'}
+                    ? 'Save changes'
+                    : 'Create product'}
                 </button>
 
               </div>

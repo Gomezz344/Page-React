@@ -1,6 +1,6 @@
 from decimal import Decimal
 from sqlalchemy import Integer, Numeric, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
 
@@ -16,3 +16,4 @@ class Servicio(Base):
     imagen: Mapped[str | None] = mapped_column(String(500))
     stock: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     estado: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    reservas: Mapped[list["Reserva"]] = relationship(back_populates="servicio")

@@ -1,23 +1,74 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { API_URL } from '../../api/client';
 
 export function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [touched, setTouched] = useState(false);
   const [sent, setSent] = useState(false);
+  const [resetToken, setResetToken] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const emailValid =
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     setTouched(true);
 
     if (!emailValid) return;
 
-    // Por ahora solo visual
-    setSent(true);
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo: email }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Could not start account recovery.');
+      setResetToken(data.reset_token || '');
+      setSent(true);
+    } catch (requestError) {
+      setError(requestError.message || 'Could not connect to the server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = async (e) => {
+    e.preventDefault();
+    if (password.length < 6 || password !== confirmPassword) {
+      setError(password.length < 6 ? 'Password must be at least 6 characters.' : 'Passwords do not match.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch(`${API_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: resetToken, password }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Could not update the password.');
+      setResetToken('');
+      setPassword('');
+      setConfirmPassword('');
+      setSent(false);
+      setEmail('');
+      setTouched(false);
+      window.alert('Password updated successfully.');
+    } catch (requestError) {
+      setError(requestError.message || 'Could not connect to the server.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,6 +92,8 @@ export function ForgotPassword() {
       <div className="relative z-10 flex min-h-screen items-center justify-center px-6 py-32">
 
         <div className="w-full max-w-md">
+
+          {error && <div className="mb-6 border border-red-400/20 bg-red-400/5 px-4 py-3 text-center text-xs text-red-300">{error}</div>}
 
           {!sent ? (
 
@@ -106,8 +159,8 @@ export function ForgotPassword() {
 
                     <p className="mt-2 text-xs text-red-300/80">
                       {email.length === 0
-                        ? 'El correo electrónico es obligatorio.'
-                        : 'Ingresa un correo electrónico válido.'}
+                        ? 'Email address is required.'
+                        : 'Enter a valid email address.'}
                     </p>
 
                   )}
@@ -119,14 +172,14 @@ export function ForgotPassword() {
 
                 <button
                   type="submit"
-                  disabled={!emailValid}
+                  disabled={!emailValid || loading}
                   className={`w-full py-3.5 text-xs uppercase tracking-[0.25em] transition-all duration-300 ${
-                    emailValid
+                    emailValid && !loading
                       ? 'bg-[#9caf88] text-[#07100b] hover:bg-[#b7c7a5]'
                       : 'cursor-not-allowed bg-white/10 text-white/20'
                   }`}
                 >
-                  Send recovery link
+                  {loading ? 'Sending...' : 'Send recovery link'}
                 </button>
 
               </form>
@@ -164,36 +217,58 @@ export function ForgotPassword() {
               </div>
 
 
-              <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#9caf88]">
-                Check your inbox
-              </p>
+              <p className="mb-5 text-xs uppercase tracking-[0.45em] text-[#9caf88]">Recovery ready</p>
 
 
               <h1 className="text-4xl font-light tracking-wide sm:text-5xl">
-                Email sent
+                Set a new password
               </h1>
 
 
               <p className="mx-auto mt-5 max-w-sm text-sm leading-7 text-white/40">
 
-                If an account exists for
+                In development mode, the recovery link is ready for
 
                 <span className="mx-1 text-white/70">
                   {email}
                 </span>
 
-                you'll receive instructions to reset
-                your password.
+                your account. Choose a new password below.
 
               </p>
 
 
-              <Link
-                to="/login"
-                className="mt-10 inline-flex border border-white/10 px-8 py-3.5 text-xs uppercase tracking-[0.25em] text-white/60 transition duration-300 hover:border-[#9caf88]/50 hover:bg-[#9caf88]/5 hover:text-[#b7c7a5]"
-              >
-                Back to sign in
-              </Link>
+              <form onSubmit={handleReset} className="mt-8 space-y-4 text-left">
+                <div>
+                  <label htmlFor="reset-token" className="mb-2 block text-[10px] uppercase tracking-[0.25em] text-white/50">
+                    Recovery token
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      id="reset-token"
+                      type="text"
+                      value={resetToken}
+                      onChange={(e) => setResetToken(e.target.value)}
+                      placeholder="The token will appear here"
+                      className="min-w-0 flex-1 border border-[#9caf88]/40 bg-white/[0.03] px-4 py-3 text-xs text-[#c9d5bd] outline-none focus:border-[#9caf88]"
+                    />
+                    <button
+                      type="button"
+                      disabled={!resetToken}
+                      onClick={() => navigator.clipboard?.writeText(resetToken)}
+                      className="border border-white/10 px-3 text-[9px] uppercase tracking-wider text-white/50 transition hover:border-[#9caf88]/40 hover:text-[#9caf88] disabled:cursor-not-allowed disabled:text-white/20"
+                    >
+                      Copiar
+                    </button>
+                  </div>
+                  {!resetToken && <p className="mt-2 text-xs text-amber-200/70">No token was generated for this email.</p>}
+                </div>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="New password" className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none focus:border-[#9caf88]/60" />
+                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none focus:border-[#9caf88]/60" />
+                <button type="submit" disabled={loading || !resetToken} className="w-full bg-[#9caf88] py-3.5 text-xs uppercase tracking-[0.25em] text-[#07100b] disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/20">{loading ? 'Updating...' : 'Update password'}</button>
+              </form>
+
+              <Link to="/login" className="mt-6 inline-flex text-xs uppercase tracking-[0.2em] text-white/40 transition hover:text-[#9caf88]">Back to sign in</Link>
 
             </div>
 

@@ -30,10 +30,10 @@ export function AdminHeader() {
 
           <p className="mt-1 text-[9px] uppercase tracking-[0.2em] text-[#9caf88]">
             {usuario?.rol_id === 1
-              ? 'Administrador'
-              : usuario?.rol_id === 2
-              ? 'Empleado'
-              : 'Usuario'}
+              ? 'Administrator'
+                : usuario?.rol_id === 2
+                ? 'Employee'
+                : 'User'}
           </p>
 
         </div>
@@ -43,7 +43,7 @@ export function AdminHeader() {
           onClick={logout}
           className="border border-white/10 px-4 py-2 text-[9px] uppercase tracking-[0.2em] text-white/40 transition hover:border-red-400/30 hover:text-red-300"
         >
-          Cerrar sesión
+          Sign out
         </button>
 
       </div>

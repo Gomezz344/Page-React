@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     stripe_success_url: str = "http://localhost:5173/pago-exitoso"
     stripe_cancel_url: str = "http://localhost:5173/pago-cancelado"
     stripe_mock_mode: bool = False
+    openai_api_key: str = ""
+    openai_model: str = "gpt-5-mini"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

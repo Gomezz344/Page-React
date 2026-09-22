@@ -19,6 +19,7 @@ import { PagoCancelado } from './pages/Checkout/PagoCancelado.jsx'
 
 import { Admin } from './pages/Admin/Admin'
 import { ProtectedRoute } from './components/Auth/ProtectedRoute'
+import { Chatbot } from './components/Chatbot/Chatbot'
 
 function App() {
 
@@ -117,6 +118,8 @@ function App() {
         />
 
       </Routes>
+
+      {!isAdminPage && <Chatbot />}
     </>
   )
 }

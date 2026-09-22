@@ -4,6 +4,9 @@ dist-ssr/
 *.local
 .env
 .env.*
+__pycache__/
+*.py[cod]
+*.db
 
 # Logs
 logs

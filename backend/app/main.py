@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from .config import settings
 from .database import Base, engine
 from . import models
-from .routers import admin, auth, carrito, catalog, pagos, productos, reservas, servicios, usuarios
+from .routers import admin, auth, carrito, catalog, chatbot, pagos, productos, reservas, servicios, usuarios
 
 app = FastAPI(title="Wildlife API", version="1.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origin_list, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -23,6 +23,7 @@ app.include_router(admin.router)
 app.include_router(carrito.router)
 app.include_router(reservas.router)
 app.include_router(pagos.router)
+app.include_router(chatbot.router)
 
 
 @app.on_event("startup")

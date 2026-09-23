@@ -15,7 +15,7 @@ El archivo [render.yaml](render.yaml) ya define el despliegue de demostración e
 1. Sube el repositorio a GitHub sin incluir `backend/.env` ni `page/.env`.
 2. En Render selecciona **New > Blueprint** y conecta el repositorio. Render leerá `render.yaml`.
 3. Completa los valores secretos solicitados (`STRIPE_*`, `OPENAI_API_KEY`) y las URLs después de conocer los subdominios generados.
-4. En la API configura `CORS_ORIGINS` con la URL del frontend y `TRUSTED_HOSTS` con el hostname del backend.
+4. En la API configura `CORS_ORIGINS` con la URL del frontend y `TRUSTED_HOSTS` con `wildlife-demo-api.onrender.com,localhost,127.0.0.1` para permitir el dominio público y el health check interno de Render.
 5. En el frontend configura `VITE_API_URL=https://<backend>.onrender.com/api` y `VITE_STRIPE_PUBLIC_KEY=pk_test_...`; vuelve a desplegar para que Vite compile esos valores.
 6. En Stripe Test crea un webhook hacia `https://<backend>.onrender.com/api/pagos/webhook` con `checkout.session.completed`, `checkout.session.expired` y `checkout.session.async_payment_failed`. Copia el `whsec_...` en Render.
 7. Comprueba `https://<backend>.onrender.com/health` antes de abrir la exposición.

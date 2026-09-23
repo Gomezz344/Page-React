@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  base: '/Page-React/',
+  // Render serves the static site from the domain root (unlike GitHub Pages).
+  base: '/',
   plugins: [react()],
 })

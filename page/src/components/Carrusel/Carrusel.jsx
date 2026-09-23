@@ -11,7 +11,7 @@ import cachorro from '../../assets/images/cachorro.jpg'
 const slides = [
     {
         type: 'video',
-        src: '/Page-React/videos/video1.mp4',
+        src: '/videos/video1.mp4',
         title: "Wild and Free",
         description: "Where every creature has a story, and every corner of nature hides a mystery."
     },

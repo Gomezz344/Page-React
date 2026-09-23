@@ -50,7 +50,7 @@ services:
     runtime: static
     rootDir: page
     buildCommand: npm ci && npm run build
-    staticPublishPath: page/dist
+    staticPublishPath: dist
     autoDeployTrigger: commit
     envVars:
       - key: VITE_API_URL

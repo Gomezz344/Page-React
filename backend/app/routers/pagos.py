@@ -1,17 +1,23 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from datetime import datetime
+from io import BytesIO
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi.responses import JSONResponse, Response
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..config import settings
 from ..core.deps import get_current_user
 from ..database import get_db
-from ..models import Pedido, Producto, Servicio, Usuario
+from ..models import Factura, Pedido, Producto, Servicio, StripeEvent, Usuario
 from ..schemas.pagos import CrearSesionRequest
 
 try:
@@ -25,8 +31,41 @@ if stripe is not None and settings.stripe_secret_key:
 router = APIRouter(prefix="/api", tags=["pagos"])
 
 
+def _stripe_dict(resource) -> dict:
+    if hasattr(resource, "to_dict_recursive"):
+        return resource.to_dict_recursive()
+    if hasattr(resource, "to_dict"):
+        return resource.to_dict()
+    return resource if isinstance(resource, dict) else dict(resource)
+
+
+def _ensure_invoice(db: Session, pedido: Pedido) -> Factura:
+    invoice = db.scalar(select(Factura).where(Factura.pedido_id == pedido.id))
+    if invoice:
+        return invoice
+    invoice = Factura(
+        numero=f"FAC-{datetime.utcnow():%Y}-{pedido.id:06d}",
+        pedido_id=pedido.id,
+        usuario_id=pedido.usuario_id,
+        subtotal=pedido.monto_total,
+        total=pedido.monto_total,
+        moneda=pedido.moneda,
+        estado="emitida",
+    )
+    db.add(invoice)
+    db.flush()
+    return invoice
+
+
 def _catalog_model(tipo: str):
     return Producto if tipo == "producto" else Servicio
+
+
+def _decrement_stock(db: Session, pedido: Pedido) -> None:
+    model = _catalog_model(pedido.tipo)
+    item = db.get(model, pedido.referencia_id)
+    if item is not None:
+        item.stock = max(0, item.stock - pedido.cantidad)
 
 
 def _build_success_url(pedido_ids: Iterable[int]) -> str:
@@ -36,9 +75,12 @@ def _build_success_url(pedido_ids: Iterable[int]) -> str:
         query["pedido_ids"] = ",".join(str(pedido_id) for pedido_id in pedido_ids)
         if settings.stripe_mock_mode:
             query["mocked"] = "1"
-        return urlunsplit(parsed._replace(query=urlencode(query)))
+        else:
+            query["session_id"] = "{CHECKOUT_SESSION_ID}"
+        success_url = urlunsplit(parsed._replace(query=urlencode(query)))
+        return success_url.replace("%7BCHECKOUT_SESSION_ID%7D", "{CHECKOUT_SESSION_ID}")
 
-    return f"http://localhost:5173/pago-exitoso?pedido_ids={','.join(str(pedido_id) for pedido_id in pedido_ids)}"
+    return f"http://localhost:5173/pago-exitoso?pedido_ids={','.join(str(pedido_id) for pedido_id in pedido_ids)}&session_id={{CHECKOUT_SESSION_ID}}"
 
 
 def _build_cancel_url(pedido_ids: Iterable[int]) -> str:
@@ -79,6 +121,8 @@ def create_checkout_session(
             )
             db.add(pedido)
             db.flush()
+            _decrement_stock(db, pedido)
+            _ensure_invoice(db, pedido)
             orders.append(pedido)
 
         db.commit()
@@ -130,14 +174,21 @@ def create_checkout_session(
         })
 
     pedido_ids = [pedido.id for pedido in pedidos]
-    session = stripe.checkout.Session.create(
-        mode="payment",
-        line_items=line_items,
-        success_url=_build_success_url(pedido_ids),
-        cancel_url=_build_cancel_url(pedido_ids),
-        customer_email=current_user.correo,
-        metadata={"pedido_ids": ",".join(str(pedido_id) for pedido_id in pedido_ids)},
-    )
+    try:
+        session = stripe.checkout.Session.create(
+            mode="payment",
+            line_items=line_items,
+            success_url=_build_success_url(pedido_ids),
+            cancel_url=_build_cancel_url(pedido_ids),
+            customer_email=current_user.correo,
+            metadata={"pedido_ids": ",".join(str(pedido_id) for pedido_id in pedido_ids)},
+        )
+    except stripe.error.StripeError as exc:
+        db.rollback()
+        raise HTTPException(status_code=502, detail="Stripe no está disponible en este momento") from exc
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=502, detail="No se pudo conectar con Stripe") from exc
 
     for pedido in pedidos:
         pedido.stripe_session_id = session.id
@@ -145,6 +196,56 @@ def create_checkout_session(
 
     db.commit()
     return {"url": session.url, "pedido_ids": pedido_ids, "session_id": session.id, "mock_mode": False}
+
+
+def _mark_session_paid(db: Session, session: dict, current_user_id: int | None = None) -> list[int]:
+    session = _stripe_dict(session)
+    metadata = session.get("metadata") or {}
+    raw_ids = metadata.get("pedido_ids") or metadata.get("pedido_id")
+    if not raw_ids:
+        return []
+    try:
+        pedido_ids = [int(value) for value in str(raw_ids).split(",") if value.strip()]
+    except ValueError:
+        return []
+    orders = db.scalars(select(Pedido).where(Pedido.id.in_(pedido_ids))).all()
+    if current_user_id is not None and any(order.usuario_id != current_user_id for order in orders):
+        raise HTTPException(status_code=403, detail="La sesión de pago no pertenece a tu cuenta")
+    for pedido in orders:
+        invoice = db.scalar(select(Factura).where(Factura.pedido_id == pedido.id))
+        if pedido.estado != "pagado":
+            pedido.estado = "pagado"
+        if invoice is None:
+            _decrement_stock(db, pedido)
+        pedido.stripe_session_id = session.get("id") or pedido.stripe_session_id
+        if invoice is None:
+            _ensure_invoice(db, pedido)
+    db.commit()
+    return [pedido.id for pedido in orders]
+
+
+@router.post("/pagos/verificar-sesion")
+def verify_checkout_session(
+    session_id: str = Query(min_length=8),
+    current_user: Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if stripe is None or not settings.stripe_secret_key:
+        raise HTTPException(status_code=503, detail="Stripe no está configurado")
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="No se pudo verificar la sesión de Stripe") from exc
+    session_data = _stripe_dict(session)
+    if session_data.get("payment_status") != "paid":
+        return {"paid": False, "status": session_data.get("payment_status", "unpaid")}
+    try:
+        pedido_ids = _mark_session_paid(db, session_data, current_user.id)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="No se pudo asociar la sesión con el pedido") from exc
+    return {"paid": True, "pedido_ids": pedido_ids}
 
 
 @router.post("/pagos/webhook")
@@ -167,25 +268,42 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     except stripe.error.SignatureVerificationError:
         return JSONResponse(status_code=400, content={"message": "Firma inválida"})
 
+    event = _stripe_dict(event)
+    event_id = event.get("id")
+    if event_id:
+        already_received = db.scalar(select(StripeEvent).where(StripeEvent.event_id == str(event_id)))
+        if already_received:
+            return JSONResponse(status_code=200, content={"received": True, "duplicate": True})
+        db.add(StripeEvent(
+            event_id=str(event_id),
+            event_type=str(event.get("type") or "unknown"),
+        ))
+        try:
+            db.flush()
+        except IntegrityError:
+            db.rollback()
+            return JSONResponse(status_code=200, content={"received": True, "duplicate": True})
     event_type = event.get("type")
-    session = event.get("data", {}).get("object", {})
-    pedido_ids_raw = session.get("metadata", {}).get("pedido_ids") or session.get("metadata", {}).get("pedido_id")
-    pedido_ids = [int(value) for value in str(pedido_ids_raw).split(",") if value.strip()]
-
+    session = (event.get("data") or {}).get("object", {})
+    session = _stripe_dict(session)
     if event_type == "checkout.session.completed":
-        for pedido in db.scalars(select(Pedido).where(Pedido.id.in_(pedido_ids))).all():
-            if pedido.estado != "pagado":
-                pedido.estado = "pagado"
-                pedido.stripe_session_id = session.get("id")
-        db.commit()
+        _mark_session_paid(db, session)
 
     elif event_type in {"checkout.session.expired", "checkout.session.async_payment_failed"}:
+        metadata = session.get("metadata") or {}
+        raw_ids = metadata.get("pedido_ids") or metadata.get("pedido_id")
+        pedido_ids = []
+        try:
+            pedido_ids = [int(value) for value in str(raw_ids).split(",") if value.strip()] if raw_ids else []
+        except ValueError:
+            pedido_ids = []
         for pedido in db.scalars(select(Pedido).where(Pedido.id.in_(pedido_ids))).all():
             if pedido.estado not in {"pagado", "cancelado"}:
                 pedido.estado = "cancelado" if event_type == "checkout.session.expired" else "fallido"
                 pedido.stripe_session_id = session.get("id")
         db.commit()
 
+    db.commit()
     return JSONResponse(status_code=200, content={"received": True})
 
 
@@ -232,3 +350,106 @@ def get_order_detail(pedido_id: int, current_user: Usuario = Depends(get_current
         "stripe_session_id": pedido.stripe_session_id,
         "fecha_creacion": pedido.fecha_creacion.isoformat(),
     }
+
+
+def _invoice_payload(invoice: Factura) -> dict:
+    return {
+        "id": invoice.id,
+        "numero": invoice.numero,
+        "pedido_id": invoice.pedido_id,
+        "subtotal": float(invoice.subtotal),
+        "total": float(invoice.total),
+        "moneda": invoice.moneda,
+        "estado": invoice.estado,
+        "fecha_emision": invoice.fecha_emision.isoformat(),
+    }
+
+
+@router.get("/facturas/me")
+def get_my_invoices(current_user: Usuario = Depends(get_current_user), db: Session = Depends(get_db)):
+    invoices = db.scalars(
+        select(Factura).where(Factura.usuario_id == current_user.id).order_by(Factura.id.desc())
+    ).all()
+    return {"facturas": [_invoice_payload(invoice) for invoice in invoices]}
+
+
+@router.get("/facturas/{factura_id}/download")
+def download_invoice(factura_id: int, current_user: Usuario = Depends(get_current_user), db: Session = Depends(get_db)):
+    invoice = db.get(Factura, factura_id)
+    if not invoice:
+        raise HTTPException(status_code=404, detail="Factura no encontrada")
+    if invoice.usuario_id != current_user.id and current_user.rol_id not in (1, 2):
+        raise HTTPException(status_code=403, detail="No tienes acceso a esta factura")
+
+    return _invoice_download_response(invoice, current_user, db)
+
+
+def _invoice_download_response(invoice: Factura, current_user: Usuario, db: Session) -> Response:
+    order = db.get(Pedido, invoice.pedido_id)
+    buffer = BytesIO()
+    document = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    document.setFillColor(colors.HexColor("#17311f"))
+    document.rect(0, height - 125, width, 125, fill=1, stroke=0)
+    document.setFillColor(colors.HexColor("#dfead3"))
+    document.setFont("Helvetica-Bold", 22)
+    document.drawString(54, height - 62, "WILDLIFE")
+    document.setFont("Helvetica", 10)
+    document.drawString(54, height - 82, "FACTURA DE VENTA")
+    document.setFillColor(colors.HexColor("#222222"))
+    document.setFont("Helvetica-Bold", 12)
+    document.drawString(54, height - 170, invoice.numero)
+    document.setFont("Helvetica", 10)
+    lines = [
+        ("Fecha de emisión", f"{invoice.fecha_emision:%Y-%m-%d %H:%M}"),
+        ("Cliente", f"{current_user.nombre} {current_user.apellido}"),
+        ("Correo", current_user.correo),
+        ("Pedido", f"#{invoice.pedido_id}"),
+        ("Concepto", order.tipo if order else "Compra Wildlife"),
+        ("Cantidad", str(order.cantidad if order else 1)),
+        ("Estado", invoice.estado),
+    ]
+    y = height - 205
+    for label, value in lines:
+        document.setFillColor(colors.HexColor("#777777"))
+        document.drawString(54, y, f"{label}:" )
+        document.setFillColor(colors.HexColor("#222222"))
+        document.drawString(170, y, value[:85])
+        y -= 23
+    document.setStrokeColor(colors.HexColor("#c9d5bd"))
+    document.line(54, y - 8, width - 54, y - 8)
+    y -= 42
+    document.setFillColor(colors.HexColor("#555555"))
+    document.drawString(54, y, "Subtotal")
+    document.drawRightString(width - 54, y, f"{invoice.subtotal:,.0f} {invoice.moneda}")
+    y -= 28
+    document.setFillColor(colors.HexColor("#17311f"))
+    document.setFont("Helvetica-Bold", 13)
+    document.drawString(54, y, "TOTAL")
+    document.drawRightString(width - 54, y, f"{invoice.total:,.0f} {invoice.moneda}")
+    document.setFont("Helvetica", 9)
+    document.setFillColor(colors.HexColor("#777777"))
+    document.drawString(54, 48, "Gracias por apoyar experiencias responsables con la naturaleza.")
+    document.save()
+    content = buffer.getvalue()
+    return Response(
+        content=content,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{invoice.numero}.pdf"'},
+    )
+
+
+@router.get("/facturas/pedido/{pedido_id}/download")
+def download_order_invoice(pedido_id: int, current_user: Usuario = Depends(get_current_user), db: Session = Depends(get_db)):
+    order = db.get(Pedido, pedido_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+    if order.usuario_id != current_user.id and current_user.rol_id not in (1, 2):
+        raise HTTPException(status_code=403, detail="No tienes acceso a esta factura")
+    invoice = db.scalar(select(Factura).where(Factura.pedido_id == pedido_id))
+    if not invoice and order.estado == "pagado":
+        invoice = _ensure_invoice(db, order)
+        db.commit()
+    if not invoice:
+        raise HTTPException(status_code=404, detail="La factura estará disponible al confirmarse el pago")
+    return _invoice_download_response(invoice, current_user, db)

@@ -21,3 +21,5 @@ class Usuario(Base):
     rol: Mapped["Rol"] = relationship(back_populates="usuarios")
     reservas: Mapped[list["Reserva"]] = relationship(back_populates="usuario")
     pagos: Mapped[list["Pago"]] = relationship(back_populates="usuario")
+    facturas: Mapped[list["Factura"]] = relationship(back_populates="usuario", cascade="all, delete-orphan")
+    reportes: Mapped[list["ReporteVenta"]] = relationship(back_populates="administrador")

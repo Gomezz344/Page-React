@@ -190,7 +190,7 @@ export function Tours() {
           HERO
       ====================================== */}
 
-      <section className="relative flex min-h-[75vh] items-end overflow-hidden">
+      <section className="relative flex min-h-[78vh] items-end overflow-hidden">
 
         {/* Imagen de fondo */}
 
@@ -213,7 +213,7 @@ export function Tours() {
 
         <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-20 md:px-10">
 
-          <p className="mb-5 text-[10px] uppercase tracking-[0.45em] text-[#b7c7a5]">
+          <p className="mb-5 inline-flex rounded-full border border-[#b7c7a5]/30 bg-[#07100b]/35 px-4 py-2 text-[10px] uppercase tracking-[0.45em] text-[#b7c7a5] backdrop-blur-sm">
             Wildlife experiences
           </p>
 
@@ -235,6 +235,8 @@ export function Tours() {
             the world around us.
 
           </p>
+
+          <div className="mt-9 flex flex-wrap gap-3 text-[9px] uppercase tracking-[0.25em] text-white/50"><span className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 backdrop-blur-sm">Small groups</span><span className="rounded-full border border-white/15 bg-white/[0.06] px-4 py-2 backdrop-blur-sm">Responsible travel</span></div>
 
         </div>
 
@@ -346,7 +348,7 @@ export function Tours() {
 
                 <article
                   key={servicio.id}
-                  className="group overflow-hidden border border-white/10 bg-white/[0.02] transition duration-500 hover:border-[#9caf88]/30"
+                  className="group overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.015] shadow-xl shadow-black/10 transition duration-500 hover:-translate-y-1 hover:border-[#9caf88]/50 hover:shadow-2xl"
                 >
 
                   {/* IMAGEN */}
@@ -380,7 +382,7 @@ export function Tours() {
 
                   {/* CONTENIDO */}
 
-                  <div className="p-7">
+                  <div className="p-7 md:p-8">
 
                     <p className="text-[9px] uppercase tracking-[0.3em] text-[#9caf88]">
                       Wildlife experience
@@ -437,7 +439,7 @@ export function Tours() {
 
                     <Link
                       to={`/tours/${servicio.id}`}
-                      className="mt-6 flex items-center justify-between border border-white/10 px-5 py-3 transition duration-300 hover:border-[#9caf88]/40 hover:bg-[#9caf88]/5"
+                      className="mt-6 flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] px-5 py-3 transition duration-300 hover:border-[#9caf88]/50 hover:bg-[#9caf88]/10"
                     >
 
                       <span className="text-[9px] uppercase tracking-[0.25em] text-white/50 transition group-hover:text-[#9caf88]">

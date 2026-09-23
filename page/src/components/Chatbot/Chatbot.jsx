@@ -63,7 +63,7 @@ export function Chatbot() {
           </form>
         </section>
       )}
-      <button type="button" onClick={() => setOpen((value) => !value)} className="fixed bottom-5 right-5 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-[#9caf88] text-xl text-[#07100b] shadow-xl transition hover:scale-105" aria-label="Abrir asistente">✦</button>
+      <button type="button" onClick={() => setOpen((value) => !value)} className="fixed bottom-40 right-5 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-[#9caf88] text-xl text-[#07100b] shadow-xl transition hover:scale-105" aria-label="Abrir asistente">✦</button>
     </>
   );
 }

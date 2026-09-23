@@ -3,8 +3,8 @@ from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.app.models.reserva import Reserva
-from backend.app.models.usuario import Usuario
+from .reserva import Reserva
+from .usuario import Usuario
 
 from ..database import Base
 

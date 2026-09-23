@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
 
@@ -19,3 +19,4 @@ class Pedido(Base):
     estado: Mapped[str] = mapped_column(String(20), nullable=False, default="pendiente")
     stripe_session_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     fecha_creacion: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    factura: Mapped["Factura | None"] = relationship(back_populates="pedido", uselist=False, cascade="all, delete-orphan")

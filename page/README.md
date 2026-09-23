@@ -2,7 +2,7 @@
 
 ## 0. Contexto y alcance
 
-Se integrará Stripe sobre lo que ya existe/está planeado: backend FastAPI + MySQL (`wildlife_db`) y frontend React + Vite, para permitir el pago de **productos** y **servicios** (Tours). Revisé el frontend y hoy no existe ningún flujo de carrito/checkout: solo se muestra el precio (`formatearPrecio` en `Tours.jsx` / `TourDetail.jsx`). Este plan cubre construirlo desde cero.
+Se integrará Stripe sobre el backend FastAPI + PostgreSQL (`wildlife_db`) y el frontend React + Vite, para permitir el pago de **productos** y **servicios** (Tours).
 
 Como la cuenta de Stripe está **sin activar (modo prueba)**, todo el desarrollo se hace con las llaves `pk_test_...` / `sk_test_...` y tarjetas de prueba — no se puede cobrar dinero real hasta activar la cuenta, pero **toda la integración técnica funciona igual en modo test que en modo real** (solo cambian las llaves al final).
 
@@ -52,7 +52,7 @@ El webhook es la fuente de verdad del pago (no la redirección del navegador), p
 - [ ] Confirmar que ninguna de estas llaves quede commiteada en el repo (`.gitignore` sobre `.env`).
 
 ### Fase 4 — Modelo de datos: pedidos/pagos
-- [ ] Nueva tabla `pedidos` (o `ordenes`) en MySQL:
+- [ ] Nueva tabla `pedidos` (o `ordenes`) en PostgreSQL:
   - `id`, `usuario_id` (FK a `usuarios`), `tipo` (`producto` o `servicio`), `referencia_id` (FK al producto/servicio), `cantidad`, `monto_total`, `moneda`, `estado` (`pendiente`, `pagado`, `fallido`, `cancelado`), `stripe_session_id`, `fecha_creacion`.
 - [ ] Modelo SQLAlchemy + schema Pydantic correspondientes, siguiendo el mismo patrón del resto del backend.
 

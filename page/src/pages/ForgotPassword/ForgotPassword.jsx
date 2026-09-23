@@ -1,16 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { API_URL } from '../../api/client';
 
 export function ForgotPassword() {
+  const initialToken = new URLSearchParams(window.location.search).get('token') || '';
   const [email, setEmail] = useState('');
   const [touched, setTouched] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [resetToken, setResetToken] = useState('');
+  const [sent, setSent] = useState(Boolean(initialToken));
+  const [resetToken, setResetToken] = useState(initialToken);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialToken) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [initialToken]);
 
   const emailValid =
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

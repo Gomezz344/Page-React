@@ -22,6 +22,7 @@ function SalesDashboard() {
   const [data, setData] = useState({ indicadores: { ventas: 0, unidades: 0, total: 0, promedio: 0 }, serie: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [reports, setReports] = useState([]);
 
   useEffect(() => {
     Promise.all([fetch(`${API_URL}/productos`), fetch(`${API_URL}/servicios`)]).then(async ([productResponse, serviceResponse]) => {
@@ -47,7 +48,31 @@ function SalesDashboard() {
     }
   };
 
-  useEffect(() => { loadAnalytics(); }, [token]);
+  const downloadReport = async () => {
+    const params = new URLSearchParams(Object.entries(filters).filter(([key, value]) => key !== 'agrupacion' && value !== ''));
+    const response = await fetch(`${API_URL}/admin/sales-report.csv?${params}`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) {
+      const result = await response.json().catch(() => ({}));
+      setError(result.message || 'No se pudo generar el reporte.');
+      return;
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'wildlife-reporte-ventas.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+    const reportsResponse = await fetch(`${API_URL}/admin/sales-reports`, { headers: { Authorization: `Bearer ${token}` } });
+    if (reportsResponse.ok) setReports((await reportsResponse.json()).reportes || []);
+  };
+
+  useEffect(() => {
+    loadAnalytics();
+    fetch(`${API_URL}/admin/sales-reports`, { headers: { Authorization: `Bearer ${token}` } })
+      .then((response) => response.ok ? response.json() : { reportes: [] })
+      .then((result) => setReports(result.reportes || []));
+  }, [token]);
 
   const maxTotal = Math.max(...data.serie.map((item) => item.total), 1);
   const maxSales = Math.max(...data.serie.map((item) => item.ventas), 1);
@@ -72,7 +97,7 @@ function SalesDashboard() {
         <label className="text-[9px] uppercase tracking-[0.2em] text-white/40">Status<select value={filters.estado} onChange={(event) => setFilters({ ...filters, estado: event.target.value })} className="mt-2 w-full border border-white/10 bg-[#07100b] px-2 py-2 text-xs text-white"><option value="">All</option>{['pagado', 'pendiente', 'cancelado', 'fallido'].map((value) => <option key={value}>{value}</option>)}</select></label>
         <label className="text-[9px] uppercase tracking-[0.2em] text-white/40">Client ID<input type="number" min="1" value={filters.cliente_id} onChange={(event) => setFilters({ ...filters, cliente_id: event.target.value })} className="mt-2 w-full border border-white/10 bg-transparent px-2 py-2 text-xs text-white" placeholder="Optional" /></label>
         <label className="text-[9px] uppercase tracking-[0.2em] text-white/40">Group<select value={filters.agrupacion} onChange={(event) => setFilters({ ...filters, agrupacion: event.target.value })} className="mt-2 w-full border border-white/10 bg-[#07100b] px-2 py-2 text-xs text-white"><option value="dia">Day</option><option value="semana">Week</option><option value="mes">Month</option></select></label>
-        <button type="submit" className="self-end bg-[#9caf88] px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#07100b]">{loading ? 'Loading...' : 'Apply filters'}</button>
+        <div className="flex flex-wrap items-end gap-2 lg:col-span-2"><button type="submit" className="bg-[#9caf88] px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#07100b]">{loading ? 'Loading...' : 'Apply filters'}</button><button type="button" onClick={downloadReport} className="border border-[#9caf88]/50 px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-[#c9d5bd] transition hover:bg-[#9caf88]/10">Download CSV</button></div>
       </form>
 
       {error && <p className="mb-6 border border-red-300/20 bg-red-300/5 p-4 text-sm text-red-200">{error}</p>}
@@ -84,6 +109,11 @@ function SalesDashboard() {
         <div className="border border-white/10 bg-white/[0.02] p-6"><div className="mb-6 flex items-end justify-between"><div><p className="text-[9px] uppercase tracking-[0.25em] text-[#9caf88]">Revenue</p><h3 className="mt-2 text-xl font-light">Sales by period</h3></div><span className="text-[10px] text-white/30">COP</span></div><div className="flex h-64 items-end gap-2 border-b border-l border-white/10 px-3 pb-0">{data.serie.length ? data.serie.map((item) => <div key={item.periodo} className="group flex h-full flex-1 items-end"><div title={`${item.periodo}: ${money(item.total)}`} className="w-full bg-[#9caf88]/70 transition hover:bg-[#c9d5bd]" style={{ height: `${Math.max((item.total / maxTotal) * 100, 3)}%` }} /></div>) : <p className="m-auto text-sm text-white/30">No sales for this filter.</p>}</div><div className="mt-3 flex justify-between text-[9px] text-white/30"><span>{data.serie[0]?.periodo || ''}</span><span>{data.serie.at(-1)?.periodo || ''}</span></div></div>
         <div className="border border-white/10 bg-white/[0.02] p-6"><div className="mb-6"><p className="text-[9px] uppercase tracking-[0.25em] text-[#9caf88]">Volume</p><h3 className="mt-2 text-xl font-light">Number of sales</h3></div><div className="h-64 border-b border-l border-white/10 p-3"><svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full overflow-visible"><polyline fill="none" stroke="#9caf88" strokeWidth="1.5" points={points} />{data.serie.map((item, index) => { const x = data.serie.length === 1 ? 50 : (index / (data.serie.length - 1)) * 100; const y = 100 - ((item.ventas / maxSales) * 86); return <circle key={item.periodo} cx={x} cy={y} r="1.8" fill="#c9d5bd"><title>{`${item.periodo}: ${item.ventas} sales`}</title></circle>; })}</svg></div><div className="mt-3 flex justify-between text-[9px] text-white/30"><span>{data.serie[0]?.periodo || ''}</span><span>{data.serie.at(-1)?.periodo || ''}</span></div></div>
       </div>
+
+      <section className="mt-8 border border-white/10 bg-white/[0.02] p-6">
+        <div className="mb-5 flex items-end justify-between"><div><p className="text-[9px] uppercase tracking-[0.25em] text-[#9caf88]">Saved reports</p><h3 className="mt-2 text-xl font-light">Sales report history</h3></div><span className="text-[10px] text-white/30">{reports.length} generated</span></div>
+        {reports.length === 0 ? <p className="text-sm text-white/30">Generate a report using the filters above.</p> : <div className="overflow-x-auto"><table className="w-full min-w-[620px] text-left text-sm"><thead className="text-[9px] uppercase tracking-[0.2em] text-white/30"><tr><th className="pb-3">Date</th><th className="pb-3">Sales</th><th className="pb-3">Units</th><th className="pb-3">Total</th></tr></thead><tbody>{reports.map((report) => <tr key={report.id} className="border-t border-white/10 text-white/65"><td className="py-3">{new Date(report.fecha_generacion).toLocaleString()}</td><td>{report.ventas}</td><td>{report.unidades}</td><td>{money(report.total)}</td></tr>)}</tbody></table></div>}
+      </section>
     </div>
   );
 }

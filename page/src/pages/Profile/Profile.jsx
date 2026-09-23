@@ -31,6 +31,7 @@ export function Profile() {
   const [reservas, setReservas] = useState([]);
 
   const [cargandoReservas, setCargandoReservas] = useState(false);
+  const [facturas, setFacturas] = useState([]);
 
 
   // ==========================================
@@ -121,6 +122,7 @@ export function Profile() {
     if (token) {
       cargarPerfil();
       cargarReservas();
+      cargarFacturas();
     }
 
   }, [token]);
@@ -171,6 +173,28 @@ export function Profile() {
 
     }
 
+  };
+
+  const cargarFacturas = async () => {
+    try {
+      const response = await fetch(`${API_URL}/facturas/me`, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await response.json();
+      if (response.ok) setFacturas(data.facturas || []);
+    } catch (requestError) {
+      console.error('Error loading invoices:', requestError);
+    }
+  };
+
+  const descargarFactura = async (factura) => {
+    const response = await fetch(`${API_URL}/facturas/${factura.id}/download`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) return;
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${factura.numero}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
 
@@ -548,6 +572,11 @@ export function Profile() {
               </div>
             )}
 
+          </div>
+
+          <div className="border border-[#9caf88]/20 bg-gradient-to-br from-[#17311f]/70 to-white/[0.02] p-7 md:col-span-2">
+            <div className="flex items-center justify-between gap-4"><div><p className="text-[9px] uppercase tracking-[0.35em] text-[#9caf88]">Billing</p><h2 className="mt-3 text-xl font-light">My invoices</h2></div><span className="text-xs text-white/30">{facturas.length} available</span></div>
+            {facturas.length === 0 ? <p className="mt-6 rounded-xl border border-dashed border-white/10 p-6 text-sm text-white/40">Invoices will appear here after a payment is confirmed.</p> : <div className="mt-6 grid gap-3">{facturas.map((factura) => <div key={factura.id} className="flex flex-col gap-4 rounded-xl border border-white/10 bg-[#07100b]/50 p-4 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-sm text-[#dfead3]">{factura.numero}</p><p className="mt-1 text-xs text-white/40">{new Date(factura.fecha_emision).toLocaleDateString()} · Order #{factura.pedido_id}</p></div><div className="flex items-center gap-4"><p className="text-sm text-white/70">{new Intl.NumberFormat('en-US', { style: 'currency', currency: factura.moneda || 'COP', maximumFractionDigits: 0 }).format(factura.total || 0)}</p><button type="button" onClick={() => descargarFactura(factura)} className="border border-[#9caf88]/40 px-3 py-2 text-[9px] uppercase tracking-[0.18em] text-[#c9d5bd] transition hover:bg-[#9caf88]/10">Download</button></div></div>)}</div>}
           </div>
 
 

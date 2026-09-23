@@ -23,10 +23,18 @@ Si tu PostgreSQL usa otro usuario/contraseña, ajusta la cadena de conexión. Pa
 ## Ejecutar
 
 ```powershell
-uvicorn app.main:app --reload --host 0.0.0.0 --port 3000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-La documentacion queda disponible en `http://localhost:3000/docs`. El backend crea las tablas si no existen; para una base existente, importa primero el dump SQL y verifica que sus columnas coincidan con los modelos.
+En Windows, si Stripe devuelve errores de conexión por un proxy local, usa el script que limpia esas variables antes de iniciar:
+
+```powershell
+.\start-dev.ps1 -Port 8001
+```
+
+La documentación queda disponible en `http://localhost:8000/docs` durante desarrollo. En producción se desactiva automáticamente. El backend usa PostgreSQL y crea las tablas nuevas al arrancar; para un despliegue serio, ejecuta la migración/verificación de esquema antes de aceptar tráfico.
+
+Variables relevantes: `APP_ENV`, `DATABASE_URL`, `SECRET_KEY`, `CORS_ORIGINS`, `TRUSTED_HOSTS`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_SUCCESS_URL`, `STRIPE_CANCEL_URL`, `EXPOSE_RESET_TOKEN` y las variables `SMTP_*` para recuperación de contraseña. No subas nunca `.env` al repositorio.
 
 ## Pruebas
 

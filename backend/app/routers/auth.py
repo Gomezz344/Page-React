@@ -1,6 +1,8 @@
 import hashlib
 import secrets
+import smtplib
 from datetime import datetime, timedelta, timezone
+from email.message import EmailMessage
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import or_, select
@@ -8,12 +10,32 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..core.security import create_access_token, hash_password, verify_password
+from ..config import settings
 from ..database import get_db
 from ..models import PasswordResetToken, Usuario
 from ..schemas.auth import ForgotPasswordRequest, LoginRequest, ResetPasswordRequest, TokenResponse
 from ..schemas.usuario import UsuarioCreate, UsuarioResponse
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+
+def _send_reset_email(recipient: str, token: str) -> None:
+    if not all((settings.smtp_host, settings.smtp_username, settings.smtp_password, settings.smtp_from_email)):
+        raise RuntimeError("SMTP no está configurado")
+    link = f"{settings.frontend_url.rstrip('/')}/forgot-password?token={token}"
+    message = EmailMessage()
+    message["Subject"] = "Recuperación de contraseña — Wildlife"
+    message["From"] = settings.smtp_from_email
+    message["To"] = recipient
+    message.set_content(
+        "Solicitaste cambiar tu contraseña de Wildlife. "
+        f"Este enlace vence en 30 minutos:\n\n{link}\n\n"
+        "Si no solicitaste este cambio, ignora este mensaje."
+    )
+    with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=15) as server:
+        server.starttls()
+        server.login(settings.smtp_username, settings.smtp_password)
+        server.send_message(message)
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -60,7 +82,15 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
         expires_at=(datetime.now(timezone.utc) + timedelta(minutes=30)).replace(tzinfo=None),
     ))
     db.commit()
-    response["reset_token"] = raw_token
+    # En desarrollo se devuelve para facilitar las pruebas sin proveedor de correo.
+    # En producción debe permanecer desactivado y sustituirse por un enlace enviado por email.
+    if settings.is_production or not settings.expose_reset_token:
+        try:
+            _send_reset_email(user.correo, raw_token)
+        except Exception as exc:
+            raise HTTPException(status_code=503, detail="El servicio de correo no está disponible") from exc
+    else:
+        response["reset_token"] = raw_token
     return response
 
 

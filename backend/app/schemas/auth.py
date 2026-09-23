@@ -4,7 +4,7 @@ from .usuario import UsuarioOut
 
 
 class LoginRequest(BaseModel):
-    correo: EmailStr
+    correo: EmailStr = Field(max_length=100)
     password: str = Field(min_length=1, max_length=128)
 
 
@@ -14,7 +14,7 @@ class TokenResponse(BaseModel):
 
 
 class ForgotPasswordRequest(BaseModel):
-    correo: EmailStr
+    correo: EmailStr = Field(max_length=100)
 
 
 class ResetPasswordRequest(BaseModel):

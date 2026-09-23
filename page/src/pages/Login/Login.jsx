@@ -182,6 +182,7 @@ export function Login() {
                   name="email"
                   type="email"
                   value={form.email}
+                  maxLength={100}
                   onChange={handleChange}
                   onBlur={() => handleBlur('email')}
                   placeholder="you@example.com"

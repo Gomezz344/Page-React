@@ -116,10 +116,13 @@ export function Usuarios() {
   const handleChange = (e) => {
 
     const { name, value } = e.target;
+    const nextValue = ['numero_documento', 'telefono'].includes(name)
+      ? value.replace(/\D/g, '').slice(0, 10)
+      : value;
 
     setForm({
       ...form,
-      [name]: value,
+      [name]: nextValue,
     });
 
   };
@@ -741,6 +744,7 @@ export function Usuarios() {
                     value={form.nombre}
                     onChange={handleChange}
                     required
+                    maxLength={20}
                     className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
                     placeholder="First name"
                   />
@@ -759,6 +763,7 @@ export function Usuarios() {
                     value={form.apellido}
                     onChange={handleChange}
                     required
+                    maxLength={20}
                     className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
                     placeholder="Last name"
                   />
@@ -822,6 +827,8 @@ export function Usuarios() {
                     value={form.numero_documento}
                     onChange={handleChange}
                     required
+                    maxLength={10}
+                    inputMode="numeric"
                     className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
                     placeholder="Document number"
                   />
@@ -866,6 +873,8 @@ export function Usuarios() {
                     value={form.telefono}
                     onChange={handleChange}
                     required
+                    maxLength={10}
+                    inputMode="numeric"
                     className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
                     placeholder="Teléfono"
                   />
@@ -885,6 +894,7 @@ export function Usuarios() {
                     value={form.correo}
                     onChange={handleChange}
                     required
+                    maxLength={100}
                     className="w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
                     placeholder="correo@ejemplo.com"
                   />

@@ -3,7 +3,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import inspect, text
+from sqlalchemy import BigInteger, String, inspect, text
 from sqlalchemy.exc import IntegrityError
 
 from .config import settings
@@ -70,6 +70,29 @@ def create_tables() -> None:
         db.commit()
     if engine.dialect.name == "postgresql":
         with engine.begin() as connection:
+            usuario_columns = {column["name"]: column for column in inspect(engine).get_columns("usuarios")}
+            if usuario_columns:
+                # PostgreSQL INTEGER is only 32-bit; BIGINT is required for all 10-digit values.
+                if not isinstance(usuario_columns["nombre"]["type"], String) or usuario_columns["nombre"]["type"].length != 20:
+                    connection.execute(text("ALTER TABLE usuarios ALTER COLUMN nombre TYPE VARCHAR(20)"))
+                if not isinstance(usuario_columns["apellido"]["type"], String) or usuario_columns["apellido"]["type"].length != 20:
+                    connection.execute(text("ALTER TABLE usuarios ALTER COLUMN apellido TYPE VARCHAR(20)"))
+                if not isinstance(usuario_columns["correo"]["type"], String) or usuario_columns["correo"]["type"].length != 100:
+                    connection.execute(text("ALTER TABLE usuarios ALTER COLUMN correo TYPE VARCHAR(100)"))
+                if not isinstance(usuario_columns["numero_documento"]["type"], BigInteger):
+                    connection.execute(text("ALTER TABLE usuarios ALTER COLUMN numero_documento TYPE BIGINT USING numero_documento::bigint"))
+                if not isinstance(usuario_columns["telefono"]["type"], BigInteger):
+                    connection.execute(text("ALTER TABLE usuarios ALTER COLUMN telefono TYPE BIGINT USING NULLIF(telefono, '')::bigint"))
+                connection.execute(text("""
+                    DO $$ BEGIN
+                        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ck_usuarios_documento_max_10_digitos') THEN
+                            ALTER TABLE usuarios ADD CONSTRAINT ck_usuarios_documento_max_10_digitos CHECK (numero_documento BETWEEN 0 AND 9999999999);
+                        END IF;
+                        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'ck_usuarios_telefono_max_10_digitos') THEN
+                            ALTER TABLE usuarios ADD CONSTRAINT ck_usuarios_telefono_max_10_digitos CHECK (telefono IS NULL OR telefono BETWEEN 0 AND 9999999999);
+                        END IF;
+                    END $$;
+                """))
             reserva_columns = {column["name"] for column in inspect(engine).get_columns("reservas")}
             if "fecha_inicio" not in reserva_columns:
                 connection.execute(text("ALTER TABLE reservas ADD COLUMN fecha_inicio DATE"))

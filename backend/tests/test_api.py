@@ -79,6 +79,37 @@ def test_health_and_registration_flow():
     assert update.json()["usuario"]["nombre"] == "Ana Actualizada"
 
 
+def test_user_profile_limits_and_integer_contact_fields():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    client = TestClient(app)
+
+    valid = client.post("/api/auth/register", json={
+        "nombre": "Ana",
+        "apellido": "Rios",
+        "tipo_documento": "CC",
+        "numero_documento": "1234567890",
+        "telefono": "3001234567",
+        "correo": "ana.limits@example.com",
+        "password": "secret123",
+    })
+    assert valid.status_code == 201
+    user = valid.json()["usuario"]
+    assert user["numero_documento"] == 1234567890
+    assert user["telefono"] == 3001234567
+
+    invalid = client.post("/api/auth/register", json={
+        "nombre": "A" * 21,
+        "apellido": "Rios",
+        "tipo_documento": "CC",
+        "numero_documento": "12345678901",
+        "telefono": "3001234567",
+        "correo": "too.long@example.com",
+        "password": "secret123",
+    })
+    assert invalid.status_code == 422
+
+
 def test_checkout_session_uses_cart_items():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)

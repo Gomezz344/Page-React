@@ -24,19 +24,19 @@ export function Register() {
   const [loading, setLoading] = useState(false);
 
   const validations = {
-    firstName: form.firstName.trim().length >= 2,
+    firstName: /^.{1,20}$/.test(form.firstName.trim()),
 
-    lastName: form.lastName.trim().length >= 2,
+    lastName: /^.{1,20}$/.test(form.lastName.trim()),
 
     documentType: form.documentType !== '',
 
-    documentNumber: /^\d{5,15}$/.test(form.documentNumber),
+    documentNumber: /^\d{1,10}$/.test(form.documentNumber),
 
     address: form.address.trim().length >= 5,
 
-    phone: /^\d{7,15}$/.test(form.phone),
+    phone: /^\d{1,10}$/.test(form.phone),
 
-    email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email),
+    email: form.email.length <= 100 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email),
 
     password: form.password.length >= 6,
 
@@ -49,10 +49,13 @@ export function Register() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const nextValue = ['documentNumber', 'phone'].includes(name)
+      ? value.replace(/\D/g, '').slice(0, 10)
+      : value;
 
     setForm((prevForm) => ({
       ...prevForm,
-      [name]: value,
+      [name]: nextValue,
     }));
 
     setTouched((prevTouched) => ({
@@ -232,6 +235,7 @@ export function Register() {
                       name="firstName"
                       label="First name"
                       placeholder="Your first name"
+                      maxLength={20}
                     />
 
                     <Input
@@ -239,6 +243,7 @@ export function Register() {
                       name="lastName"
                       label="Last name"
                       placeholder="Your last name"
+                      maxLength={20}
                     />
 
                   </div>
@@ -328,6 +333,8 @@ export function Register() {
                       label="Document number"
                       placeholder="1234567890"
                       type="text"
+                      maxLength={10}
+                      inputMode="numeric"
                     />
 
                   </div>
@@ -367,18 +374,21 @@ export function Register() {
 
                       <Input
                         {...inputProps}
-                        name="phone"
-                        label="Phone"
-                        placeholder="3001234567"
-                        type="tel"
+                      name="phone"
+                      label="Phone"
+                      placeholder="3001234567"
+                      type="tel"
+                      maxLength={10}
+                      inputMode="numeric"
                       />
 
                       <Input
                         {...inputProps}
-                        name="email"
-                        label="Email address"
-                        placeholder="you@example.com"
-                        type="email"
+                      name="email"
+                      label="Email address"
+                      placeholder="you@example.com"
+                      type="email"
+                      maxLength={100}
                       />
 
                     </div>

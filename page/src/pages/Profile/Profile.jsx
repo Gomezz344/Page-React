@@ -205,10 +205,13 @@ export function Profile() {
   const manejarCambio = (e) => {
 
     const { name, value } = e.target;
+    const nextValue = name === 'telefono'
+      ? value.replace(/\D/g, '').slice(0, 10)
+      : value;
 
     setFormulario((actual) => ({
       ...actual,
-      [name]: value,
+      [name]: nextValue,
     }));
 
   };
@@ -639,6 +642,7 @@ export function Profile() {
                     value={formulario.nombre}
                     onChange={manejarCambio}
                     required
+                    maxLength={20}
                     className="mt-2 w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
                   />
 
@@ -659,6 +663,7 @@ export function Profile() {
                     value={formulario.apellido}
                     onChange={manejarCambio}
                     required
+                    maxLength={20}
                     className="mt-2 w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
                   />
 
@@ -679,6 +684,7 @@ export function Profile() {
                     value={formulario.correo}
                     onChange={manejarCambio}
                     required
+                    maxLength={100}
                     className="mt-2 w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
                   />
 
@@ -699,6 +705,8 @@ export function Profile() {
                     value={formulario.telefono}
                     onChange={manejarCambio}
                     required
+                    maxLength={10}
+                    inputMode="numeric"
                     className="mt-2 w-full border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-[#9caf88]/50"
                   />
 

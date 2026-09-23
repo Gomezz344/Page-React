@@ -144,8 +144,9 @@ export function ForgotPassword() {
 
                   <input
                     id="email"
-                    type="email"
-                    value={email}
+                  type="email"
+                  value={email}
+                  maxLength={100}
                     onChange={(e) => {
                       setEmail(e.target.value);
                       setSent(false);

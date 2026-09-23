@@ -3,6 +3,8 @@ const Input = ({
   label,
   type = 'text',
   placeholder,
+  maxLength,
+  inputMode,
   className = '',
   form,
   handleChange,
@@ -29,6 +31,8 @@ const Input = ({
           onChange={handleChange}
           onBlur={() => handleBlur(name)}
           placeholder={placeholder}
+          maxLength={maxLength}
+          inputMode={inputMode}
           className={`w-full border bg-white/[0.03] px-4 py-3 pr-12 text-sm text-white outline-none transition placeholder:text-white/20 ${getInputClasses(
             name
           )}`}

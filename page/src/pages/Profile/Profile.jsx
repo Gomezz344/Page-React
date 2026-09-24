@@ -571,12 +571,15 @@ export function Profile() {
               </div>
             ) : (
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                {reservas.map((reserva) => (
+                {reservas.map((reserva) => {
+                  const reservationState = String(reserva.estado || '').trim().toLowerCase();
+                  const canceled = ['cancelada', 'cancelado'].includes(reservationState);
+                  return (
                   <article key={reserva.id} className="rounded-2xl border border-white/10 bg-[#08140d]/80 p-5">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-[9px] uppercase tracking-[0.25em] text-[#9caf88]">Booking #{reserva.id}</p>
                       <span className="rounded-full border border-[#9caf88]/40 bg-[#9caf88]/10 px-2 py-1 text-[8px] uppercase tracking-[0.2em] text-[#cfe2c7]">
-                        {reserva.estado}
+                        {reservationState || 'pending'}
                       </span>
                     </div>
 
@@ -586,11 +589,12 @@ export function Profile() {
                       <p><span className="text-white/35">Dates:</span> {reserva.fecha_inicio} {reserva.fecha_fin ? `- ${reserva.fecha_fin}` : ''}</p>
                       <p><span className="text-white/35">Total:</span> {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(reserva.monto_total || 0)}</p>
                     </div>
-                    {!["cancelada", "cancelado"].includes(reserva.estado) && (
-                      <button type="button" onClick={() => cancelarReserva(reserva)} className="mt-5 border border-red-300/30 px-4 py-2 text-[9px] uppercase tracking-[0.2em] text-red-200/70 transition hover:bg-red-400/10">Cancel reservation</button>
+                    {!canceled && (
+                      <button type="button" onClick={() => cancelarReserva(reserva)} className="mt-6 w-full border border-red-300/60 bg-red-400/10 px-4 py-3 text-[10px] font-medium uppercase tracking-[0.2em] text-red-100 transition hover:bg-red-400/20">Cancel this reservation</button>
                     )}
                   </article>
-                ))}
+                  );
+                })}
               </div>
             )}
 

@@ -36,6 +36,10 @@ La documentación queda disponible en `http://localhost:8000/docs` durante desar
 
 Variables relevantes: `APP_ENV`, `DATABASE_URL`, `SECRET_KEY`, `CORS_ORIGINS`, `TRUSTED_HOSTS`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_SUCCESS_URL`, `STRIPE_CANCEL_URL`, `EXPOSE_RESET_TOKEN` y las variables `SMTP_*` para recuperación de contraseña. No subas nunca `.env` al repositorio.
 
+Para crear el primer administrador en Render, abre la Shell del servicio API y ejecuta `python scripts/create_admin.py --email tu-correo@ejemplo.com --numero-documento 123456789`. El script solicitará la contraseña de forma interactiva y puede ejecutarse nuevamente para actualizar el mismo administrador.
+
+Si el plan no incluye Shell, configura temporalmente `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD` y `ADMIN_BOOTSTRAP_DOCUMENT` en las variables de entorno del servicio Render. Tras el deploy, inicia sesión y elimina esas tres variables.
+
 ## Pruebas
 
 ```powershell

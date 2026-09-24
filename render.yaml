@@ -44,6 +44,14 @@ services:
         value: "true"
       - key: FRONTEND_URL
         sync: false
+      - key: ADMIN_BOOTSTRAP_EMAIL
+        sync: false
+      - key: ADMIN_BOOTSTRAP_PASSWORD
+        sync: false
+      - key: ADMIN_BOOTSTRAP_DOCUMENT
+        sync: false
+      - key: ADMIN_BOOTSTRAP_FORCE_PASSWORD
+        value: "false"
 
   - type: web
     name: wildlife-demo-web

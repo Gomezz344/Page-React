@@ -63,3 +63,26 @@ Configura logs centralizados, alertas para respuestas 5xx, errores de webhook y 
 ## Prueba de aceptación
 
 En staging usa una tarjeta de prueba como `4242 4242 4242 4242`, verifica que el pedido pase a `pagado`, que aparezca la factura PDF y que un segundo envío del mismo webhook no cree otra factura ni vuelva a descontar stock. Verifica también cancelación y pago rechazado.
+# Crear el primer administrador en Render
+
+Despues del primer despliegue, abre la Shell del servicio `wildlife-demo-api` y ejecuta:
+
+```bash
+cd /opt/render/project/src/backend
+python scripts/create_admin.py --email tu-correo@ejemplo.com --numero-documento 123456789
+```
+
+El comando pedira la contrasena dos veces sin mostrarla. Si el correo ya existe, activa esa cuenta, le asigna el rol administrador (`rol_id=1`) y actualiza su contrasena. No guardes la contrasena en `render.yaml`, el repositorio ni los logs.
+
+### Si tu plan no incluye Shell
+
+En el servicio `wildlife-demo-api`, agrega temporalmente estas variables en **Environment**:
+
+```text
+ADMIN_BOOTSTRAP_EMAIL=tu-correo@ejemplo.com
+ADMIN_BOOTSTRAP_PASSWORD=una-contrasena-segura
+ADMIN_BOOTSTRAP_DOCUMENT=123456789
+ADMIN_BOOTSTRAP_FORCE_PASSWORD=false
+```
+
+Guarda los cambios y espera el nuevo deploy. Inicia sesión con esos datos y, cuando confirmes que funciona, elimina `ADMIN_BOOTSTRAP_EMAIL`, `ADMIN_BOOTSTRAP_PASSWORD` y `ADMIN_BOOTSTRAP_DOCUMENT` de Render y vuelve a desplegar. La API no crea ningún administrador si esas variables no están completas.

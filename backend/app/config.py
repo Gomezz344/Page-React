@@ -26,6 +26,13 @@ class Settings(BaseSettings):
     smtp_username: str = ""
     smtp_password: str = ""
     smtp_from_email: str = ""
+    admin_bootstrap_email: str = ""
+    admin_bootstrap_password: str = ""
+    admin_bootstrap_document: int | None = None
+    admin_bootstrap_name: str = "Administrador"
+    admin_bootstrap_lastname: str = "Wildlife"
+    admin_bootstrap_document_type: str = "CC"
+    admin_bootstrap_force_password: bool = False
 
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parents[1] / ".env",

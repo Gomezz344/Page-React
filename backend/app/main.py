@@ -3,10 +3,11 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import BigInteger, String, inspect, text
+from sqlalchemy import BigInteger, String, inspect, select, text
 from sqlalchemy.exc import IntegrityError
 
 from .config import settings
+from .core.security import hash_password
 from .database import Base, SessionLocal, engine
 from . import models
 from .routers import admin, auth, carrito, catalog, chatbot, pagos, productos, reservas, servicios, usuarios
@@ -68,6 +69,7 @@ def create_tables() -> None:
             if db.get(models.Rol, role_id) is None:
                 db.add(models.Rol(id=role_id, nombre=name, descripcion=description))
         db.commit()
+        _bootstrap_admin(db)
     if engine.dialect.name == "postgresql":
         with engine.begin() as connection:
             usuario_columns = {column["name"]: column for column in inspect(engine).get_columns("usuarios")}
@@ -112,6 +114,41 @@ def create_tables() -> None:
     if "stock" not in columns:
         with engine.begin() as connection:
             connection.execute(text("ALTER TABLE servicios ADD COLUMN stock INTEGER NOT NULL DEFAULT 10"))
+
+
+def _bootstrap_admin(db) -> None:
+    """Create the first admin from Render env vars, when explicitly configured."""
+    if not all((settings.admin_bootstrap_email, settings.admin_bootstrap_password, settings.admin_bootstrap_document)):
+        return
+    if len(settings.admin_bootstrap_password) < 6:
+        raise RuntimeError("ADMIN_BOOTSTRAP_PASSWORD debe tener al menos 6 caracteres")
+
+    email = settings.admin_bootstrap_email.strip().lower()
+    user = db.scalar(select(models.Usuario).where(models.Usuario.correo == email))
+    document_owner = db.scalar(
+        select(models.Usuario).where(models.Usuario.numero_documento == settings.admin_bootstrap_document)
+    )
+    if document_owner is not None and (user is None or document_owner.id != user.id):
+        raise RuntimeError("ADMIN_BOOTSTRAP_DOCUMENT ya pertenece a otro usuario")
+
+    if user is None:
+        user = models.Usuario(
+            nombre=settings.admin_bootstrap_name,
+            apellido=settings.admin_bootstrap_lastname,
+            tipo_documento=settings.admin_bootstrap_document_type,
+            numero_documento=settings.admin_bootstrap_document,
+            correo=email,
+            password=hash_password(settings.admin_bootstrap_password),
+            rol_id=1,
+            estado=1,
+        )
+        db.add(user)
+    else:
+        user.rol_id = 1
+        user.estado = 1
+        if settings.admin_bootstrap_force_password:
+            user.password = hash_password(settings.admin_bootstrap_password)
+    db.commit()
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(_: Request, exc):

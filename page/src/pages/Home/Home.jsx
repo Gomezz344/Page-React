@@ -636,10 +636,12 @@ function Reveal({ children }) {
 
 function Landscape({ image, title, number }) {
 
+  const slug = title.toLowerCase();
+
   return (
 
     <Link
-      to="/explore"
+      to={`/biomes/${slug}`}
       className="group relative h-[500px] overflow-hidden"
     >
 

@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from ..config import settings
 from ..core.deps import get_current_user
 from ..database import get_db
-from ..models import Factura, Pedido, Producto, Servicio, StripeEvent, Usuario
+from ..models import Factura, Pedido, Producto, Reserva, Servicio, StripeEvent, Usuario
 from ..schemas.pagos import CrearSesionRequest
 
 try:
@@ -99,6 +99,18 @@ def create_checkout_session(
     current_user: Usuario = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    reserva = None
+    if payload.reserva_id is not None:
+        reserva = db.get(Reserva, payload.reserva_id)
+        if not reserva or reserva.usuario_id != current_user.id:
+            raise HTTPException(status_code=404, detail="Reserva no encontrada")
+        if reserva.estado not in {"pendiente", "pendiente_pago"}:
+            raise HTTPException(status_code=400, detail="La reserva ya fue procesada")
+        if len(payload.items) != 1 or payload.items[0].tipo != "servicio" or payload.items[0].item_id != reserva.servicio_id:
+            raise HTTPException(status_code=400, detail="El pago no coincide con la reserva")
+        if payload.items[0].cantidad != reserva.cantidad_personas:
+            raise HTTPException(status_code=400, detail="La cantidad no coincide con la reserva")
+
     if settings.stripe_mock_mode or not settings.stripe_secret_key:
         orders = []
         for item in payload.items:
@@ -113,6 +125,7 @@ def create_checkout_session(
                 usuario_id=current_user.id,
                 tipo=item.tipo,
                 referencia_id=item.item_id,
+                reserva_id=payload.reserva_id if reserva is not None else None,
                 cantidad=item.cantidad,
                 monto_total=float(catalog_item.precio) * item.cantidad,
                 moneda="COP",
@@ -126,6 +139,10 @@ def create_checkout_session(
             orders.append(pedido)
 
         db.commit()
+        if reserva is not None:
+            reserva.estado = "confirmada"
+            reserva.stripe_session_id = "mock_session"
+            db.commit()
         pedido_ids = [pedido.id for pedido in orders]
         return {
             "url": _build_success_url(pedido_ids),
@@ -152,6 +169,7 @@ def create_checkout_session(
             usuario_id=current_user.id,
             tipo=item.tipo,
             referencia_id=item.item_id,
+            reserva_id=payload.reserva_id if reserva is not None else None,
             cantidad=item.cantidad,
             monto_total=precio_total,
             moneda="COP",
@@ -193,6 +211,9 @@ def create_checkout_session(
     for pedido in pedidos:
         pedido.stripe_session_id = session.id
         pedido.estado = "pendiente"
+    if reserva is not None:
+        reserva.stripe_session_id = session.id
+        reserva.estado = "pendiente_pago"
 
     db.commit()
     return {"url": session.url, "pedido_ids": pedido_ids, "session_id": session.id, "mock_mode": False}
@@ -220,6 +241,11 @@ def _mark_session_paid(db: Session, session: dict, current_user_id: int | None =
         pedido.stripe_session_id = session.get("id") or pedido.stripe_session_id
         if invoice is None:
             _ensure_invoice(db, pedido)
+        if pedido.reserva_id:
+            reserva = db.get(Reserva, pedido.reserva_id)
+            if reserva:
+                reserva.estado = "confirmada"
+                reserva.stripe_session_id = pedido.stripe_session_id
     db.commit()
     return [pedido.id for pedido in orders]
 
@@ -301,6 +327,10 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
             if pedido.estado not in {"pagado", "cancelado"}:
                 pedido.estado = "cancelado" if event_type == "checkout.session.expired" else "fallido"
                 pedido.stripe_session_id = session.get("id")
+                if pedido.reserva_id:
+                    reserva = db.get(Reserva, pedido.reserva_id)
+                    if reserva:
+                        reserva.estado = "cancelada"
         db.commit()
 
     db.commit()

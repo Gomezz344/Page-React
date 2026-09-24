@@ -13,6 +13,7 @@ class Pedido(Base):
     usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False, index=True)
     tipo: Mapped[str] = mapped_column(String(20), nullable=False, default="producto")
     referencia_id: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    reserva_id: Mapped[int | None] = mapped_column(ForeignKey("reservas.id", ondelete="SET NULL"), nullable=True, index=True)
     cantidad: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     monto_total: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False, default=0)
     moneda: Mapped[str] = mapped_column(String(10), nullable=False, default="COP")

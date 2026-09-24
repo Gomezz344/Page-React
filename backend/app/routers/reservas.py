@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from ..core.deps import get_current_user
 from ..database import get_db
-from ..models import Reserva, Servicio, Usuario
+from ..models import Pedido, Reserva, Servicio, Usuario
 from ..schemas.reserva import ReservaCreate, ReservaOut, ReservaUpdate
 
 router = APIRouter(prefix="/api/reservas", tags=["reservas"])
@@ -21,6 +21,9 @@ def create_reserva(
     servicio = db.get(Servicio, payload.servicio_id)
     if not servicio or servicio.estado != 1:
         raise HTTPException(status_code=404, detail="Servicio no encontrado")
+
+    if payload.fecha_inicio < date.today():
+        raise HTTPException(status_code=400, detail="La fecha de la reserva no puede estar en el pasado")
 
     if payload.cantidad_personas > servicio.stock:
         raise HTTPException(status_code=400, detail="No hay suficientes cupos para esta reserva")
@@ -60,6 +63,7 @@ def list_reservas(
             "id": reserva.id,
             "usuario_id": reserva.usuario_id,
             "servicio_id": reserva.servicio_id,
+            "servicio_nombre": reserva.servicio.nombre if reserva.servicio else None,
             "cantidad_personas": reserva.cantidad_personas,
             "fecha_inicio": str(reserva.fecha_inicio),
             "fecha_fin": str(reserva.fecha_fin) if reserva.fecha_fin else None,
@@ -87,6 +91,7 @@ def my_reservas(
             "id": reserva.id,
             "usuario_id": reserva.usuario_id,
             "servicio_id": reserva.servicio_id,
+            "servicio_nombre": reserva.servicio.nombre if reserva.servicio else None,
             "cantidad_personas": reserva.cantidad_personas,
             "fecha_inicio": str(reserva.fecha_inicio),
             "fecha_fin": str(reserva.fecha_fin) if reserva.fecha_fin else None,
@@ -117,6 +122,7 @@ def get_reserva(
         "id": reserva.id,
         "usuario_id": reserva.usuario_id,
         "servicio_id": reserva.servicio_id,
+        "servicio_nombre": reserva.servicio.nombre if reserva.servicio else None,
         "cantidad_personas": reserva.cantidad_personas,
         "fecha_inicio": str(reserva.fecha_inicio),
         "fecha_fin": str(reserva.fecha_fin) if reserva.fecha_fin else None,
@@ -154,6 +160,8 @@ def update_reserva(
         reserva.cantidad_personas = payload.cantidad_personas
 
     if payload.fecha_inicio is not None:
+        if current_user.rol_id not in (1, 2) and payload.fecha_inicio < date.today():
+            raise HTTPException(status_code=400, detail="La fecha de la reserva no puede estar en el pasado")
         reserva.fecha_inicio = payload.fecha_inicio
     if payload.fecha_fin is not None:
         reserva.fecha_fin = payload.fecha_fin
@@ -177,6 +185,7 @@ def update_reserva(
         "id": reserva.id,
         "usuario_id": reserva.usuario_id,
         "servicio_id": reserva.servicio_id,
+        "servicio_nombre": reserva.servicio.nombre if reserva.servicio else None,
         "cantidad_personas": reserva.cantidad_personas,
         "fecha_inicio": str(reserva.fecha_inicio),
         "fecha_fin": str(reserva.fecha_fin) if reserva.fecha_fin else None,
@@ -187,6 +196,33 @@ def update_reserva(
         "stripe_session_id": reserva.stripe_session_id,
         "fecha_creacion": reserva.fecha_creacion.isoformat(),
     }
+
+
+@router.delete("/{reserva_id}")
+def cancel_reserva(
+    reserva_id: int,
+    current_user: Usuario = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    reserva = db.get(Reserva, reserva_id)
+    if not reserva:
+        raise HTTPException(status_code=404, detail="Reserva no encontrada")
+    if reserva.usuario_id != current_user.id and current_user.rol_id not in (1, 2):
+        raise HTTPException(status_code=403, detail="No tienes permisos para cancelar esta reserva")
+    if reserva.estado in {"cancelada", "cancelado"}:
+        raise HTTPException(status_code=400, detail="La reserva ya está cancelada")
+    if current_user.rol_id not in (1, 2) and date.today() >= reserva.fecha_inicio:
+        raise HTTPException(status_code=400, detail="Solo puedes cancelar hasta un día antes de la fecha reservada")
+
+    order = db.scalar(select(Pedido).where(Pedido.reserva_id == reserva.id))
+    if order and order.estado == "pagado":
+        servicio = db.get(Servicio, reserva.servicio_id)
+        if servicio:
+            servicio.stock += reserva.cantidad_personas
+        order.estado = "cancelado"
+    reserva.estado = "cancelada"
+    db.commit()
+    return {"message": "Reserva cancelada correctamente", "estado": reserva.estado}
 
 
 @router.put("/{reserva_id}/estado")

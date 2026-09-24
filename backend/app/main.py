@@ -110,6 +110,9 @@ def create_tables() -> None:
                 connection.execute(text("ALTER TABLE pagos ADD COLUMN usuario_id INTEGER"))
                 if "reserva_id" in pago_columns:
                     connection.execute(text("UPDATE pagos AS pagos SET usuario_id = reservas.usuario_id FROM reservas WHERE pagos.reserva_id = reservas.id AND pagos.usuario_id IS NULL"))
+            pedido_columns = {column["name"] for column in inspect(engine).get_columns("pedidos")}
+            if "reserva_id" not in pedido_columns:
+                connection.execute(text("ALTER TABLE pedidos ADD COLUMN reserva_id INTEGER REFERENCES reservas(id) ON DELETE SET NULL"))
     columns = {column["name"] for column in inspect(engine).get_columns("servicios")}
     if "stock" not in columns:
         with engine.begin() as connection:

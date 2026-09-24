@@ -16,6 +16,7 @@ import { ForgotPassword } from './pages/ForgotPassword/ForgotPassword.jsx'
 import { Shop } from './pages/Shop/Shop.jsx'
 import { PagoExitoso } from './pages/Checkout/PagoExitoso.jsx'
 import { PagoCancelado } from './pages/Checkout/PagoCancelado.jsx'
+import { Reservations } from './pages/Reservations/Reservations.jsx'
 
 import { Admin } from './pages/Admin/Admin'
 import { ProtectedRoute } from './components/Auth/ProtectedRoute'
@@ -87,6 +88,11 @@ function App() {
         <Route
           path="/shop"
           element={<Shop />}
+        />
+
+        <Route
+          path="/reservas"
+          element={<Reservations />}
         />
 
         <Route

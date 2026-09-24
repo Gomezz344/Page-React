@@ -185,6 +185,22 @@ export function Profile() {
     }
   };
 
+  const cancelarReserva = async (reserva) => {
+    if (!window.confirm('¿Quieres cancelar esta reserva?')) return;
+    try {
+      const response = await fetch(`${API_URL}/reservas/${reserva.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Could not cancel the reservation.');
+      setMensaje(data.message || 'Reservation canceled.');
+      cargarReservas();
+    } catch (requestError) {
+      setError(requestError.message);
+    }
+  };
+
   const descargarFactura = async (factura) => {
     const response = await fetch(`${API_URL}/facturas/${factura.id}/download`, { headers: { Authorization: `Bearer ${token}` } });
     if (!response.ok) return;
@@ -565,11 +581,14 @@ export function Profile() {
                     </div>
 
                     <div className="mt-4 space-y-2 text-sm text-white/70">
-                      <p><span className="text-white/35">Service:</span> {reserva.servicio_id}</p>
+                      <p><span className="text-white/35">Tour:</span> {reserva.servicio_nombre || `#${reserva.servicio_id}`}</p>
                       <p><span className="text-white/35">Guests:</span> {reserva.cantidad_personas}</p>
                       <p><span className="text-white/35">Dates:</span> {reserva.fecha_inicio} {reserva.fecha_fin ? `- ${reserva.fecha_fin}` : ''}</p>
                       <p><span className="text-white/35">Total:</span> {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(reserva.monto_total || 0)}</p>
                     </div>
+                    {!["cancelada", "cancelado"].includes(reserva.estado) && (
+                      <button type="button" onClick={() => cancelarReserva(reserva)} className="mt-5 border border-red-300/30 px-4 py-2 text-[9px] uppercase tracking-[0.2em] text-red-200/70 transition hover:bg-red-400/10">Cancel reservation</button>
+                    )}
                   </article>
                 ))}
               </div>

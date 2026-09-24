@@ -9,6 +9,7 @@ class PagoItemInput(BaseModel):
 
 class CrearSesionRequest(BaseModel):
     items: list[PagoItemInput] = Field(min_length=1)
+    reserva_id: int | None = Field(default=None, gt=0)
 
 
 class PedidoOut(BaseModel):

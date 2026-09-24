@@ -100,6 +100,12 @@ export function Shop() {
       return;
     }
 
+    const tour = items.find((item) => item.type === 'servicio');
+    if (tour) {
+      navigate(`/reservas?servicio_id=${tour.id}&cantidad=${tour.cantidad}`);
+      return;
+    }
+
     try {
       const response = await fetch(`${API_URL}/pagos/crear-sesion`, {
         method: 'POST',

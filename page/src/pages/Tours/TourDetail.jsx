@@ -165,6 +165,7 @@ export function TourDetail() {
             item_id: Number(servicio.id),
             cantidad: Number(reservaForm.cantidadPersonas),
           }],
+          reserva_id: reservaData.id,
         }),
       });
 

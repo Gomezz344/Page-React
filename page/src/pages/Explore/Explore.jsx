@@ -1,24 +1,24 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import forestImage from '../../assets/images/forest.png';
-import oceanImage from '../../assets/images/ocean.jpg';
-import mountainImage from '../../assets/images/mountain.jpg';
 import desertImage from '../../assets/images/desert.jpg';
-import jaguarImage from '../../assets/images/jaguar.jpg';
-import eagleImage from '../../assets/images/eagle.jpg';
-import whaleImage from '../../assets/images/whale.avif';
-import landscapeImage from '../../assets/images/paisaje2.avif';
+import amazonImage from '../../assets/images/Amazon basin.webp';
+import arcticImage from '../../assets/images/Artic circle.jpg';
+import galapagosImage from '../../assets/images/Galapagos islands.jpg';
+import reefImage from '../../assets/images/Great Barrier Reef.avif';
+import himalayaImage from '../../assets/images/himalaya.jpg';
+import patagoniaImage from '../../assets/images/Patagonia.jpg';
+import serengetiImage from '../../assets/images/Serengueti.jpg';
 
 const PLACES = [
-  { id: 'amazon', name: 'Amazon Basin', region: 'South America', country: 'Brazil · Peru · Colombia', type: 'Forest', image: forestImage, x: 28, y: 64, description: 'A living network of rivers and rainforest where floodplains, canopy and forest floor form different worlds.', fact: 'The Amazon River carries more water than any other river on Earth.', color: '#9caf88' },
-  { id: 'galapagos', name: 'Galápagos Islands', region: 'South America', country: 'Ecuador', type: 'Ocean', image: jaguarImage, x: 20, y: 55, description: 'Volcanic islands where isolation created fearless wildlife and helped inspire the study of evolution.', fact: 'Marine and land ecosystems meet here in one of the Pacific’s most unusual archipelagos.', color: '#8db8c7' },
+  { id: 'amazon', name: 'Amazon Basin', region: 'South America', country: 'Brazil · Peru · Colombia', type: 'Forest', image: amazonImage, x: 28, y: 64, description: 'A living network of rivers and rainforest where floodplains, canopy and forest floor form different worlds.', fact: 'The Amazon River carries more water than any other river on Earth.', color: '#9caf88' },
+  { id: 'galapagos', name: 'Galápagos Islands', region: 'South America', country: 'Ecuador', type: 'Ocean', image: galapagosImage, x: 20, y: 55, description: 'Volcanic islands where isolation created fearless wildlife and helped inspire the study of evolution.', fact: 'Marine and land ecosystems meet here in one of the Pacific’s most unusual archipelagos.', color: '#8db8c7' },
   { id: 'sahara', name: 'Sahara', region: 'Africa', country: 'North Africa', type: 'Desert', image: desertImage, x: 51, y: 43, description: 'A sea of stone, sand and sky stretching across the top of Africa, crossed by ancient trade routes.', fact: 'The Sahara is the largest hot desert in the world.', color: '#d1b77a' },
-  { id: 'serengeti', name: 'Serengeti', region: 'Africa', country: 'Tanzania · Kenya', type: 'Savanna', image: eagleImage, x: 55, y: 61, description: 'Open grasslands shaped by seasonal rain, grazing herds and some of the planet’s most recognisable predators.', fact: 'The annual migration moves millions of wildebeest, zebra and gazelles across the plains.', color: '#d2a56f' },
-  { id: 'himalaya', name: 'Himalaya', region: 'Asia', country: 'Nepal · India · Bhutan', type: 'Mountains', image: mountainImage, x: 75, y: 42, description: 'A dramatic wall of peaks, glaciers and valleys where altitude changes life within a few kilometres.', fact: 'Mount Everest rises 8,849 metres above sea level.', color: '#c9c1a5' },
-  { id: 'great-barrier-reef', name: 'Great Barrier Reef', region: 'Oceania', country: 'Australia', type: 'Ocean', image: oceanImage, x: 88, y: 70, description: 'A vast constellation of coral reefs, islands and lagoons visible from space and alive with colour.', fact: 'It is the world’s largest coral reef system, made of thousands of individual reefs.', color: '#8db8c7' },
-  { id: 'patagonia', name: 'Patagonia', region: 'South America', country: 'Chile · Argentina', type: 'Mountains', image: landscapeImage, x: 29, y: 82, description: 'Wind-carved plains, blue lakes and granite towers at the southern edge of the Americas.', fact: 'Patagonia contains temperate forests, steppe, glaciers and some of the world’s clearest night skies.', color: '#a8b69b' },
-  { id: 'arctic', name: 'Arctic Circle', region: 'Arctic', country: 'Across the northern ocean', type: 'Polar', image: whaleImage, x: 57, y: 17, description: 'A shifting world of sea ice, tundra, whales and long seasonal light at the top of the planet.', fact: 'The Arctic is an ocean surrounded by continents, unlike Antarctica, which is a continent surrounded by ocean.', color: '#b7d7d5' },
+  { id: 'serengeti', name: 'Serengeti', region: 'Africa', country: 'Tanzania · Kenya', type: 'Savanna', image: serengetiImage, x: 55, y: 61, description: 'Open grasslands shaped by seasonal rain, grazing herds and some of the planet’s most recognisable predators.', fact: 'The annual migration moves millions of wildebeest, zebra and gazelles across the plains.', color: '#d2a56f' },
+  { id: 'himalaya', name: 'Himalaya', region: 'Asia', country: 'Nepal · India · Bhutan', type: 'Mountains', image: himalayaImage, x: 75, y: 42, description: 'A dramatic wall of peaks, glaciers and valleys where altitude changes life within a few kilometres.', fact: 'Mount Everest rises 8,849 metres above sea level.', color: '#c9c1a5' },
+  { id: 'great-barrier-reef', name: 'Great Barrier Reef', region: 'Oceania', country: 'Australia', type: 'Ocean', image: reefImage, x: 88, y: 70, description: 'A vast constellation of coral reefs, islands and lagoons visible from space and alive with colour.', fact: 'It is the world’s largest coral reef system, made of thousands of individual reefs.', color: '#8db8c7' },
+  { id: 'patagonia', name: 'Patagonia', region: 'South America', country: 'Chile · Argentina', type: 'Mountains', image: patagoniaImage, x: 29, y: 82, description: 'Wind-carved plains, blue lakes and granite towers at the southern edge of the Americas.', fact: 'Patagonia contains temperate forests, steppe, glaciers and some of the world’s clearest night skies.', color: '#a8b69b' },
+  { id: 'arctic', name: 'Arctic Circle', region: 'Arctic', country: 'Across the northern ocean', type: 'Polar', image: arcticImage, x: 57, y: 17, description: 'A shifting world of sea ice, tundra, whales and long seasonal light at the top of the planet.', fact: 'The Arctic is an ocean surrounded by continents, unlike Antarctica, which is a continent surrounded by ocean.', color: '#b7d7d5' },
 ];
 
 const FILTERS = ['All', 'Africa', 'Asia', 'Europe', 'North America', 'South America', 'Oceania', 'Arctic'];
